@@ -1,0 +1,52 @@
+{
+  "pages": [
+    { "id": "page-1", "name": "Core loop" },
+    { "id": "page-2", "name": "Profile & social" }
+  ],
+  "artboards": [
+    { "file": "Main.dc.html", "title": "Home feed", "page": "page-1", "x": 0, "y": 0, "w": 390, "h": 844 },
+    { "file": "Thread.dc.html", "title": "Topic thread", "page": "page-1", "x": 470, "y": 0, "w": 390, "h": 844 },
+    { "file": "Compose.dc.html", "title": "Compose · 1 What", "page": "page-1", "x": 0, "y": 1120, "w": 390, "h": 844 },
+    { "file": "Rating.dc.html", "title": "Compose · 2 Rate", "page": "page-1", "x": 470, "y": 1120, "w": 390, "h": 844 },
+    { "file": "Interstitial.dc.html", "title": "Did you mean? — DEFERRED", "page": "page-1", "x": 1030, "y": 1120, "w": 390, "h": 844 },
+    { "file": "MyProfile.dc.html", "title": "Your profile", "page": "page-2", "x": 0, "y": 0, "w": 390, "h": 844 },
+    { "file": "Settings.dc.html", "title": "Settings", "page": "page-2", "x": 470, "y": 0, "w": 390, "h": 844 },
+    { "file": "OtherProfile.dc.html", "title": "Someone else · not followed", "page": "page-2", "x": 940, "y": 0, "w": 390, "h": 844 },
+    { "file": "Followers.dc.html", "title": "Followers / Following", "page": "page-2", "x": 1410, "y": 0, "w": 390, "h": 844 }
+  ],
+  "annotations": [
+    {
+      "id": "set-note",
+      "page": "page-1",
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "text": "EDITORIAL — Kreami screens\n\nType: Instrument Serif for titles and every numeral, Archivo for body and metadata. Ink #17130F on #FAF7F1, one burgundy accent, hairline rules instead of cards.\n\nZERO WITHOUT THE STRIKE\nFive empty dollops read as 0/5 because the accent-colored numeral always sits beside them — see Jury duty on the home feed and Dana on the thread.\n\nOPEN\nThe dollop glyph is still a first pass. It carries the whole brand and deserves more iteration than it has had."
+    },
+    {
+      "id": "compose-note",
+      "page": "page-1",
+      "x": 0,
+      "y": 890,
+      "w": 860,
+      "text": "COMPOSE — two steps, left to right\n\n1 WHAT — one field, results appear from the second keystroke. Each result shows its average and count, so joining a populated thread is more attractive than typing a new one.\n\n2 RATE — six tap targets, 48px, no slider. The note is optional and the button says so by not mentioning it.\n\nMATCHING RULE (revised): an exact match ignoring case joins that thread and cannot create a duplicate. Anything else becomes a new topic, with no confirmation step. That makes this search list the ONLY thing preventing near-duplicate threads — so it has to be fast, generous, and impossible to miss. Rank it by similarity, break ties by Kreami count.\n\nThe bottom third of screen 1 is intentionally bare: the real keyboard occupies it."
+    },
+    {
+      "id": "deferred-note",
+      "page": "page-1",
+      "x": 1030,
+      "y": 890,
+      "w": 390,
+      "text": "DEFERRED — not in v1\n\nThe fuzzy-match confirmation step. Kept as a drawn screen because it is the obvious remedy if near-duplicate topics turn out to be a real problem in the beta, but nothing routes here under the exact-match rule."
+    },
+    {
+      "id": "profile-note",
+      "page": "page-2",
+      "x": 1880,
+      "y": 0,
+      "w": 390,
+      "text": "PROFILE & SOCIAL\n\nAVERAGE KREAM GIVEN sits in a ruled band on both profiles — it is the personality stat. Manish reads 3.4; Dana reads 1.9 in the accent, which tells you who she is before you read a single Kreami.\n\nOwn profile gets an outlined Edit profile; someone else's gets the filled burgundy Follow. Only one filled button per screen, so the primary action is never ambiguous.\n\nFollow states: filled = not following, outlined = following. Rows carry each person's average so the list is decidable rather than just a directory — remove that line if it reads as clutter.\n\nPROFILE PHOTO has two entry points: a camera badge on your own avatar, and a Profile photo row at the top of Settings. Avatars are the one image the v1 storage budget covers \u2014 the no-photos rule applies to Kreamis, not to profile pictures.\n\nKREAMI ROWS now carry likes, replies, age, and the topic's average and count \u2014 the same widgets as the home feed, in the profile's tighter layout. The remaining difference is deliberate: the feed needs a person's name and avatar on every card, a profile does not.\n\nSettings covers only what the design docs actually commit to: the 30-day handle cooldown, the public-and-permanent notice, and working account deletion.\n\nNOT DESIGNED YET: block, report, the edit-profile form, and the photo cropper."
+    }
+  ],
+  "launch": { "view": "canvas", "page": "page-2" }
+}

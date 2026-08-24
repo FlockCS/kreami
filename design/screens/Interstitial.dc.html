@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: oklch(0.44 0.13 20); text-decoration: none; }
+    a:hover { color: oklch(0.36 0.11 20); }
+  </style>
+</helmet>
+<div style="width: 390px; height: 844px; background: #FAF7F1; color: #17130F; font-family: 'Archivo', Helvetica, sans-serif; display: flex; flex-direction: column; overflow: hidden;">
+
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 22px 24px 14px;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#17130F" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+    <div style="font-size: 15px; color: #8C8177;">Cancel</div>
+  </div>
+
+  <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; padding: 0 24px 20px;">
+
+    <div style="font-size: 10px; letter-spacing: 0.18em; color: #8C8177; font-weight: 500;">SOMEONE IS ALREADY RATING THIS</div>
+
+    <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 40px; line-height: 1.1; margin-top: 16px; text-wrap: pretty;">Eating a candy apple</div>
+
+    <div style="height: 1px; background: #17130F; margin-top: 24px;"></div>
+
+    <div style="display: flex; align-items: baseline; gap: 12px; margin-top: 18px;">
+      <div style="display: flex; align-items: center; gap: 5px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6c1.2 2.5 2.6 3.7 4.4 5.1 2.2 1.7 3.6 3.6 3.6 6.2 0 3.7-3.6 6.6-8 6.6s-8-2.9-8-6.6c0-2.6 1.4-4.5 3.6-6.2C9.4 6.3 10.8 5.1 12 2.6z" fill="oklch(0.44 0.13 20)"></path></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6c1.2 2.5 2.6 3.7 4.4 5.1 2.2 1.7 3.6 3.6 3.6 6.2 0 3.7-3.6 6.6-8 6.6s-8-2.9-8-6.6c0-2.6 1.4-4.5 3.6-6.2C9.4 6.3 10.8 5.1 12 2.6z" fill="oklch(0.44 0.13 20)"></path></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6c1.2 2.5 2.6 3.7 4.4 5.1 2.2 1.7 3.6 3.6 3.6 6.2 0 3.7-3.6 6.6-8 6.6s-8-2.9-8-6.6c0-2.6 1.4-4.5 3.6-6.2C9.4 6.3 10.8 5.1 12 2.6z" fill="oklch(0.44 0.13 20)"></path></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6c1.2 2.5 2.6 3.7 4.4 5.1 2.2 1.7 3.6 3.6 3.6 6.2 0 3.7-3.6 6.6-8 6.6s-8-2.9-8-6.6c0-2.6 1.4-4.5 3.6-6.2C9.4 6.3 10.8 5.1 12 2.6z" fill="oklch(0.44 0.13 20)"></path></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6c1.2 2.5 2.6 3.7 4.4 5.1 2.2 1.7 3.6 3.6 3.6 6.2 0 3.7-3.6 6.6-8 6.6s-8-2.9-8-6.6c0-2.6 1.4-4.5 3.6-6.2C9.4 6.3 10.8 5.1 12 2.6z" fill="none" stroke="#CFC4B4" stroke-width="1.3"></path></svg>
+      </div>
+      <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 26px; line-height: 1;">4.2</div>
+      <div style="font-size: 10px; letter-spacing: 0.16em; color: #8C8177; font-weight: 500;">KREAMS · 38 KREAMIS</div>
+    </div>
+
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 4px; padding: 0 24px 34px;">
+    <div style="background: oklch(0.44 0.13 20); color: #FAF7F1; height: 54px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600;">Join this thread</div>
+    <div style="height: 52px; display: flex; align-items: center; justify-content: center;">
+      <span style="font-size: 14px; color: #17130F; text-decoration: underline; text-underline-offset: 3px;">Mine is different — post separately</span>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

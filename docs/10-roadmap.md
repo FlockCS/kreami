@@ -1,0 +1,166 @@
+# 10 — Roadmap
+
+Sized for **one person, evenings and weekends, with Claude Code**. Sessions are ~2–4 hours.
+Estimates assume AI-assisted implementation and are deliberately conservative on the parts
+that are actually hard (matching, RLS, auth deep links) and aggressive on the parts that are
+CRUD.
+
+Phases ship in order. **Each phase ends with something runnable** — no phase leaves the app
+in a broken state.
+
+---
+
+## Phase 0 — Foundation (2–3 sessions)
+
+Nothing user-visible. Everything downstream depends on it.
+
+- [ ] Git repo, TypeScript strict, ESLint/Prettier
+- [ ] `npx create-expo-app` with Expo Router, NativeWind, TanStack Query
+- [ ] Two Supabase projects: `kreami-dev`, `kreami-prod`
+- [ ] Supabase CLI wired up; first migration applies from a file, not the dashboard
+- [ ] `supabase gen types` in a script; `database.types.ts` generated
+- [ ] GitHub Actions: migrate, deploy web to Cloudflare Pages, **keepalive cron**
+- [ ] Cloudflare Pages project connected (**not Vercel** — see [03](03-architecture.md))
+
+**Done when:** a schema change on your laptop reaches prod through CI, and the web build
+deploys automatically.
+
+> Do the keepalive cron in Phase 0. If you skip it, the dev project pauses during a two-week
+> gap between sessions and you lose an evening confused about why nothing works.
+
+---
+
+## Phase 1 — Auth and identity (2–3 sessions)
+
+- [ ] `profiles` table, `reserved_handles`, RLS policies
+- [ ] Trigger creating a profile row on `auth.users` insert
+- [ ] Google OAuth on web and native
+- [ ] Magic link with **Resend SMTP configured** — not the built-in sender
+- [ ] Deep link handling; **tested on a physical phone**
+- [ ] Handle picker with live availability check
+- [ ] Session persistence: secure-store native, localStorage web
+- [ ] Sign out, and account deletion
+
+**Done when:** you can sign in with Google on iOS, Android, and web with the same account,
+close the app, reopen it, and still be signed in.
+
+> Auth deep links are the most common place Expo projects lose a weekend. Budget for it and
+> test on hardware, not just the simulator.
+
+---
+
+## Phase 2 — The core loop (4–6 sessions)
+
+The heart of the product. If you build only this, you have something worth showing.
+
+- [ ] `topics`, `topic_aliases`, `kreamis` tables with indexes and RLS
+- [ ] `normalize_topic_title()`, `create_topic()`, `resolve_topic()`
+- [ ] `search_topics()` with the trigram index
+- [ ] `post_kreami()` with rate limiting
+- [ ] Counter triggers + `recompute_topic_aggregates()`
+- [ ] **`topic_resolution_log` writing from day one** — it is the evidence that decides
+      whether the exact-match rule survives the beta
+- [ ] `KreamRating` component: display and input, with 0 visually distinct from unrated
+- [ ] Compose flow: text → live search → resolve → rate → post (two steps, no confirmation)
+- [ ] Topic thread screen with histogram and sort tabs
+- [ ] Your own profile listing your Kreamis
+
+**Done when:** you can post a Kreami, have a friend post on the same experience by typing
+something slightly different, and land in the same thread.
+
+> This is the phase to slow down on. The matching pipeline in
+> [05](05-topic-matching.md) is the product. Everything after this is a list view.
+
+---
+
+## Phase 3 — Social (3–4 sessions)
+
+- [ ] `follows`, `likes`, `replies` with triggers and RLS
+- [ ] `home_feed()` and `global_feed()` with keyset pagination
+- [ ] Feed card component, shared between both feeds
+- [ ] Infinite scroll, pull to refresh
+- [ ] Follow/unfollow with optimistic updates
+- [ ] Like and reply
+- [ ] Other users' profiles; follower/following lists
+- [ ] **Empty-feed backfill** — Discover inline when you follow nobody
+
+**Done when:** two accounts can follow each other and see each other's Kreamis in Home.
+
+---
+
+## Phase 4 — Discovery and activity (2–3 sessions)
+
+- [ ] Discover screen: search + `active_topics()`
+- [ ] User search by handle and display name
+- [ ] `notifications` table + triggers, with the **24h `topic_activity` cap**
+- [ ] Activity tab, unread badge, mark-all-read
+- [ ] `suggested_profiles` table and the onboarding follow step
+
+**Done when:** a brand-new account can find people and topics without knowing anyone.
+
+---
+
+## Phase 5 — Launch readiness (3–4 sessions)
+
+- [ ] Onboarding: 4 screens, ending in "leave your first Kreami"
+- [ ] Report flow + `reports` table
+- [ ] Admin SQL views: report queue, duplicate candidates, resolution-log stats
+- [ ] `merge_topics()` + nightly duplicate-candidate report
+- [ ] Nightly counter reconciliation
+- [ ] **OpenGraph Worker** for `/t/:slug` and `/u/:handle` — link previews
+- [ ] Sentry
+- [ ] Full [security checklist](09-security-moderation.md#pre-launch-checklist)
+- [ ] Seed 50–100 Topics yourself so the app isn't empty on day one
+
+**Done when:** the checklist passes and a shared link renders a real preview card.
+
+> **Seeding is not optional.** An empty rating app is unusable — the first ten users need
+> threads to join, or they'll each create a lonely Topic and leave. Write 50–100 Kreamis on
+> obviously universal experiences before anyone else sees it.
+
+---
+
+## Phase 6 — Private beta (ongoing)
+
+Not a build phase. 20–50 people you know.
+
+**Watch these three numbers.** They're the ones the design is betting on:
+
+1. **Median Kreamis per Topic** (topics older than 7 days). If it stays at 1.0, the
+   exact-match rule is fragmenting the corpus and search-as-you-type isn't catching enough
+   people before they type a duplicate. **This is the most important number in the app**, and
+   under the exact-match rule it is also the number most at risk.
+2. **Share of posts resolving to `new`** in the resolution log — and, by eye, how many of
+   those are near-misses of a Topic that already existed. That ratio is the direct measure of
+   what the exact-match rule is costing.
+3. **Second-post rate within 48 hours.** The retention signal that matters.
+
+If (1) sits near 1.0 and (2) is full of near-misses, the remedies are ready and ordered in
+[05 — Topic Matching](05-topic-matching.md): strip punctuation in normalization first, then
+reinstate the fuzzy confirmation step if that isn't enough.
+
+---
+
+## After beta, in rough priority order
+
+| Item | Trigger |
+|------|---------|
+| **User blocks** | Immediately, if any harassment appears. Jumps the queue. |
+| Push notifications | Retention is the problem and in-app isn't enough |
+| Photos | Users repeatedly ask; accept the storage and moderation cost |
+| Native app store release | Web has traction. Costs $99/yr + $25 |
+| `feed_entries` fan-out | Home feed exceeds ~500 ms |
+| Materialized `active_topics` | Discover exceeds ~200 ms |
+| Embedding-based dedupe | Duplicate report fills with semantic pairs ([05](05-topic-matching.md)) |
+| Pairwise comparison ranking | Users want personal ranked lists |
+| Private accounts | Repeatedly requested — and re-read [11](11-decisions-and-open-questions.md) first |
+
+---
+
+## Rough total
+
+**16–23 sessions to a private beta.** At two sessions a week, roughly **two to three months**.
+
+The estimate is honest about where it will slip: **Phase 2 will take longer than written**,
+because topic matching is a real problem with a real feedback loop, not a CRUD screen. If a
+phase is going to overrun, let it be that one — it's the only one where extra care compounds.

@@ -1,0 +1,31 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "title": "A · Analog Ticket", "x": 0, "y": 0, "w": 390, "h": 844 },
+    { "file": "Editorial.dc.html", "title": "B · Editorial", "x": 470, "y": 0, "w": 390, "h": 844 },
+    { "file": "CandyPop.dc.html", "title": "C · Candy Pop", "x": 940, "y": 0, "w": 390, "h": 844 }
+  ],
+  "annotations": [
+    {
+      "id": "dir-a",
+      "x": 0,
+      "y": -230,
+      "w": 390,
+      "text": "A — ANALOG TICKET\n\nCream stock, ink-stamped rating, condensed grotesque with mono metadata. Treats a Kreami as a stub you kept: a physical verdict with a date on it.\n\nWhy it might win: most distinctive of the three, and it screenshots like an object rather than a UI. The mono numerals give the score real authority.\n\nTradeoff: the retro-analog register is a strong flavor to commit to. It can read as effortful, and condensed type is the least forgiving of long topic titles at small sizes."
+    },
+    {
+      "id": "dir-b",
+      "x": 470,
+      "y": -230,
+      "w": 390,
+      "text": "B — EDITORIAL\n\nHairline rules instead of cards, serif display for titles and numerals, one burgundy accent, a lot of air. Entries sit on the page like a review column.\n\nWhy it might win: the deadpan works best here. 'Jury duty, 0/5' is funnier set seriously than set playfully, and the restraint ages well.\n\nTradeoff: the quietest of the three. Less thumb-stopping in a feed, and the generous whitespace means fewer Kreamis per screen — which matters when density is what makes the feed feel alive."
+    },
+    {
+      "id": "dir-c",
+      "x": 940,
+      "y": -230,
+      "w": 390,
+      "text": "C — CANDY POP\n\nChunky black outlines, hard offset shadows, rounded geometric type, three same-chroma accents. Every card is an object you want to poke.\n\nWhy it might win: most obviously fun, highest contrast in a feed, and the easiest to build a recognizable brand from. Reads instantly as 'not a serious review site.'\n\nTradeoff: the loudest and the fastest to date — this style is everywhere right now. Risks reading as a kids' app, and the heavy chrome competes with the rating for attention."
+    }
+  ],
+  "launch": { "view": "canvas" }
+}
