@@ -119,6 +119,35 @@ picker adds friction to the ten-second post. Search and recency handle discovery
 
 ---
 
+---
+
+### D14 — Corrected neutrals for WCAG AA
+**Chosen (2026-08-25):** darken the neutral ramp so text and the Kream glyph meet WCAG AA,
+and collapse `muted` and `faint` into one tone.
+
+| Token | Was | Now | Ratio on `#FAF7F1` |
+|-------|-----|-----|--------------------|
+| `muted` | `#8C8177` (3.56:1) | `#786F66` | **4.61:1** |
+| `faint` | `#B0A597` (2.26:1) | *removed* — use `muted` | — |
+| `empty` | `#CFC4B4` (1.61:1) | `#958D82` | **3.06:1** |
+
+**Why:** the original palette failed the 4.5:1 floor that
+[08 — UX Flows](08-ux-flows.md) already committed to. The load-bearing failure was `empty`,
+the *unfilled* Kream glyph, at 1.61:1 — at that ratio you cannot count the empty dollops, so
+a 2/5 and a 4/5 look alike and the glyph row stops carrying the rating. That undermines the
+whole premise of the scale.
+
+**Why one tone instead of two:** pushed to 4.5:1 independently, `muted` and `faint` land
+0.1% apart in luminance — indistinguishable. Keeping both would have been a token that lied.
+Secondary hierarchy is now carried by size and weight.
+
+**Applied to:** `tailwind.config.js`, `src/theme/tokens.ts`, and all nine
+`design/screens/*.dc.html` artboards. The A/B/C direction study was deliberately left on the
+original palette — it is the record of that decision, not live design.
+
+**Cost, accepted:** metadata is slightly heavier than drawn. The airiness of the direction
+comes from whitespace and the serif, not from pale metadata, so the character survives.
+
 ## Open questions
 
 Things genuinely unresolved. Each needs an answer eventually; none blocks Phase 0.
@@ -148,34 +177,6 @@ compounds); then reinstate the fuzzy confirmation step, which is already designe
 
 **Do not skip `topic_resolution_log` in Phase 2** — without it this question cannot be
 answered and the decision cannot be revisited on evidence.
-
-### Q3b — The Editorial palette fails WCAG AA for text ⚠️
-Measured during the Phase 0 scaffold, against the `#FAF7F1` paper background:
-
-| Token | Hex | Ratio | Verdict |
-|-------|-----|-------|---------|
-| `ink` | `#17130F` | 17.28:1 | passes |
-| `body` | `#4A423A` | 9.21:1 | passes |
-| `accent` | `#8C2C33` | 7.78:1 | passes |
-| `muted` | `#8C8177` | **3.56:1** | fails AA for normal text |
-| `faint` | `#B0A597` | **2.26:1** | fails outright |
-| `empty` | `#CFC4B4` | **1.61:1** | fails the 3:1 non-text minimum |
-
-This contradicts [08 — UX Flows](08-ux-flows.md), which commits to "Contrast ≥ 4.5:1 for all
-text, including the muted metadata line." `muted` and `faint` carry every handle, timestamp,
-section label, and topic average in the app, so this is not a corner case.
-
-`empty` is the unfilled Kream glyph. It is not text, but WCAG 1.4.11 asks 3:1 of meaningful
-non-text UI, and an unfilled Kream is meaningful — it is half of the rating.
-
-**Hue-preserving replacements that reach 4.5:1:** `muted` → `#7A7068` (4.52:1),
-`faint` → `#787067` (4.55:1). Those two land close enough together that the muted/faint
-distinction mostly collapses, so the honest fix is probably a re-pick of the whole neutral
-ramp rather than a darkening of two swatches.
-
-**Unresolved on purpose:** darkening these changes the character of the design — the airy,
-low-contrast quality is a lot of why the Editorial direction was chosen. Decide deliberately.
-Fixing it later means touching every screen.
 
 ### Q4 — What happens to a Topic when everyone deletes their Kreami?
 Currently it lingers with `kreami_count = 0`, hidden from discovery but reachable by URL.

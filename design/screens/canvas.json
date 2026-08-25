@@ -21,7 +21,7 @@
       "x": 940,
       "y": 0,
       "w": 390,
-      "text": "EDITORIAL — Kreami screens\n\nType: Instrument Serif for titles and every numeral, Archivo for body and metadata. Ink #17130F on #FAF7F1, one burgundy accent, hairline rules instead of cards.\n\nZERO WITHOUT THE STRIKE\nFive empty dollops read as 0/5 because the accent-colored numeral always sits beside them — see Jury duty on the home feed and Dana on the thread.\n\nOPEN\nThe dollop glyph is still a first pass. It carries the whole brand and deserves more iteration than it has had."
+      "text": "EDITORIAL — Kreami screens\n\nType: Instrument Serif for titles and every numeral, Archivo for body and metadata. Ink #17130F on #FAF7F1, one burgundy accent, hairline rules instead of cards.\n\nZERO WITHOUT THE STRIKE\nFive empty dollops read as 0/5 because the accent-colored numeral always sits beside them — see Jury duty on the home feed and Dana on the thread.\n\nCONTRAST CORRECTED (2026-08-25)\nThe neutrals failed WCAG AA and are darkened here: metadata is now #786F66 (4.61:1) and the unfilled dollop #958D82 (3.06:1). The old #B0A597 tone is gone — it and #8C8177 could not both pass and stay distinguishable, so secondary hierarchy is size and weight now, not colour. The A/B/C direction study keeps the original palette as the record of that decision.\n\nOPEN\nThe dollop glyph is still a first pass. It carries the whole brand and deserves more iteration than it has had."
     },
     {
       "id": "compose-note",

@@ -213,7 +213,11 @@ right emotional frame for a rating app.
 - The Kream control needs real `accessibilityLabel`s: *"Rate 4 out of 5 Kreams."*
 - **Never encode rating in color alone.** Filled vs unfilled must differ in shape.
 - Support Dynamic Type; the 150-char note must reflow, never truncate.
-- Contrast ≥ 4.5:1 for all text, including the muted metadata line.
+- Contrast ≥ 4.5:1 for all text, including the muted metadata line. The palette was
+  corrected to meet this — `muted` `#786F66` is 4.61:1 on paper, and there is deliberately
+  no lighter text token. See [11 — Decisions](11-decisions-and-open-questions.md), D14.
+- The **unfilled** Kream glyph is `#958D82` (3.06:1), not decoration: it is half the rating,
+  so it carries the 3:1 non-text minimum.
 
 ## Visual direction
 

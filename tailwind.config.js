@@ -6,6 +6,10 @@
  * hex values here are the converted equivalents:
  *   accent       oklch(0.44 0.13 20) -> #8C2C33
  *   accentPress  oklch(0.36 0.11 20) -> #6B1D24
+ *
+ * Neutrals were corrected for WCAG AA (see docs/11, D14). `faint` is gone:
+ * it and `muted` could not both reach 4.5:1 and stay distinguishable, so they
+ * are one tone and hierarchy comes from size and weight instead.
  */
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -17,11 +21,10 @@ module.exports = {
         paper: '#FAF7F1',
         ink: '#17130F',
         body: '#4A423A',
-        muted: '#8C8177',
-        faint: '#B0A597',
+        muted: '#786F66',
         rule: '#E4DCD0',
         fill: '#EAE2D6',
-        empty: '#CFC4B4',
+        empty: '#958D82',
         accent: '#8C2C33',
         'accent-press': '#6B1D24',
       },

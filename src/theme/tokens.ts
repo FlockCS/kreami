@@ -9,6 +9,12 @@
  * these are the converted sRGB equivalents:
  *   accent      oklch(0.44 0.13 20) -> #8C2C33
  *   accentPress oklch(0.36 0.11 20) -> #6B1D24
+ *
+ * The neutrals were corrected for WCAG AA (docs/11, D14). The original
+ * palette had `muted` at 3.56:1, `faint` at 2.26:1 and the unfilled Kream
+ * glyph at 1.61:1. Darkening `muted` and `faint` separately landed them
+ * 0.1% apart in luminance, so they are now a single tone and hierarchy is
+ * carried by size and weight.
  */
 
 export const colors = {
@@ -18,16 +24,18 @@ export const colors = {
   ink: '#17130F',
   /** Body copy and Kreami notes. */
   body: '#4A423A',
-  /** Metadata, labels, secondary text. */
-  muted: '#8C8177',
-  /** Counters and de-emphasised metadata. */
-  faint: '#B0A597',
-  /** Hairline dividers. */
+  /**
+   * Metadata, labels, counters, hints — every secondary text tone.
+   * 4.61:1 on paper. There is deliberately no lighter text token: see the
+   * note above.
+   */
+  muted: '#786F66',
+  /** Hairline dividers. Decorative, so no contrast minimum applies. */
   rule: '#E4DCD0',
   /** Avatar placeholders, histogram tracks. */
   fill: '#EAE2D6',
-  /** Unfilled Kream glyph stroke. */
-  empty: '#CFC4B4',
+  /** Unfilled Kream glyph. 3.06:1 — it is meaningful UI, not decoration. */
+  empty: '#958D82',
   /** The single accent. Filled Kreams, primary buttons, 0/5 numerals. */
   accent: '#8C2C33',
   /** Pressed state for accent surfaces. */

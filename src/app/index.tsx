@@ -17,13 +17,13 @@ function Row({ label, status, detail }: { label: string; status: CheckStatus; de
     <View className="flex-row items-start justify-between gap-4 border-b border-rule py-4">
       <View className="flex-1">
         <Text className="font-sans text-[15px] text-ink">{label}</Text>
-        <Text className="mt-1 font-sans text-[13px] leading-5 text-faint">{detail}</Text>
+        <Text className="mt-1 font-sans text-[13px] leading-5 text-muted">{detail}</Text>
       </View>
       <Text
         className={
           status === 'ok'
             ? 'font-sans-semibold text-[10px] tracking-label text-accent'
-            : 'font-sans-semibold text-[10px] tracking-label text-faint'
+            : 'font-sans-semibold text-[10px] tracking-label text-muted'
         }
       >
         {status === 'ok' ? 'READY' : 'PENDING'}
