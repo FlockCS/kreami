@@ -64,6 +64,16 @@ somebody else signs up.
 
 ## Correctness and hygiene
 
+- [ ] **Google avatars are hotlinked, not copied.** Sign-in with Google stores the
+      `lh3.googleusercontent.com` URL in `avatar_url` and the app renders it forever. Two
+      problems: browsers that block Google-owned hosts (Brave, by default) fail the image,
+      so those users never see anybody's Google photo — measured: `fetch` returns the bytes,
+      an `<img>` does not render; and every page render tells Google who is looking at whom.
+      The Avatar now falls back to the person glyph instead of a blank circle, which makes
+      the failure tidy rather than fixing it. The fix is to copy the OAuth photo into the
+      avatars bucket on first sign-in and store our own URL — the same pipeline an upload
+      already uses. *Trigger: before the private beta, or the first person who asks why
+      their Google photo is missing.*
 - [ ] **Orphaned avatar files.** Deleting your account deletes your photo, but only because
       the client sweeps Storage immediately before calling `delete_account()`. Postgres
       cannot do it — Supabase's `storage.protect_delete()` trigger rejects direct SQL

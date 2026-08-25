@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { useState } from 'react';
 import { View, type ColorValue } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
@@ -28,6 +29,13 @@ export function PersonGlyph({ color, size = 22 }: { color: ColorValue; size?: nu
  * A blank filled circle — which is what every avatar in the app used to be —
  * reads as "still loading" rather than "no photo". The glyph says the absence
  * is settled.
+ *
+ * "None" includes a photo that will not load. Sign-in with Google stores a
+ * lh3.googleusercontent.com URL, and browsers that block Google-owned hosts —
+ * Brave does by default — fail that request: `fetch` returns the bytes, an
+ * `<img>` does not render. Without the fallback below that produced the exact
+ * blank circle the glyph exists to prevent, and only for people who signed in
+ * with Google, which is most of them.
  */
 export function Avatar({
   url,
@@ -38,6 +46,13 @@ export function Avatar({
   size: number;
   name?: string;
 }) {
+  // Which url failed, rather than whether one did. Rows are recycled as a list
+  // scrolls, so a boolean would condemn whoever landed in the row next; storing
+  // the url means a new one is simply a different value and gets its own try.
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+
+  const showPhoto = Boolean(url) && url !== failedUrl;
+
   return (
     <View
       style={{
@@ -50,13 +65,14 @@ export function Avatar({
         overflow: 'hidden',
       }}
     >
-      {url ? (
+      {showPhoto ? (
         <Image
           source={url}
           style={{ width: size, height: size }}
           contentFit="cover"
           cachePolicy="memory-disk"
           transition={120}
+          onError={() => setFailedUrl(url ?? null)}
           accessibilityLabel={name ? `${name}'s photo` : 'Profile photo'}
         />
       ) : (
