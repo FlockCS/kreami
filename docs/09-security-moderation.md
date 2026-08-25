@@ -112,13 +112,27 @@ and deserves review:
 2. **Always check `auth.uid() is null`** and raise. Never assume a caller is authenticated.
 3. **Never accept a `user_id` parameter.** Take the actor from `auth.uid()`. A function with
    `post_kreami(user_id uuid, ...)` lets anyone post as anyone.
-4. **`revoke execute ... from public`**, then grant only to `authenticated` (or `anon` for
-   genuinely public reads like `search_topics`).
+4. **Revoke from `anon` BY NAME.** ⚠️ `revoke execute ... from public` is *not* enough on
+   Supabase, and this bit us for real in Phase 1. Supabase ships default privileges that
+   grant EXECUTE on new functions in `public` to `anon` and `authenticated` **directly**;
+   revoking from `PUBLIC` removes only the implicit grant and leaves the direct one intact.
+   The function stays callable without a session.
 
 ```sql
 alter function post_kreami set search_path = public, pg_temp;
-revoke execute on function post_kreami from public;
+revoke execute on function post_kreami from public, anon;
 grant execute on function post_kreami to authenticated;
+```
+
+**Verify it, don't assume it.** Call every new function with nothing but the anon key and
+confirm you get `42501 permission denied` — not your own "Not authenticated" error, which
+means the function ran and merely declined. Those two look identical from the client and
+mean very different things:
+
+```bash
+curl -sS -X POST "$URL/rest/v1/rpc/your_function" \
+  -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+  -H 'Content-Type: application/json' -d '{}'
 ```
 
 ## Rate limiting

@@ -14,12 +14,77 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string
+          follower_count: number
+          following_count: number
+          handle: string | null
+          handle_changed_at: string | null
+          id: string
+          is_suspended: boolean
+          kreami_count: number
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name: string
+          follower_count?: number
+          following_count?: number
+          handle?: string | null
+          handle_changed_at?: string | null
+          id: string
+          is_suspended?: boolean
+          kreami_count?: number
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string
+          follower_count?: number
+          following_count?: number
+          handle?: string | null
+          handle_changed_at?: string | null
+          id?: string
+          is_suspended?: boolean
+          kreami_count?: number
+        }
+        Relationships: []
+      }
+      reserved_handles: {
+        Row: {
+          created_at: string
+          handle: string
+          reason: string
+          reserved_until: string | null
+        }
+        Insert: {
+          created_at?: string
+          handle: string
+          reason?: string
+          reserved_until?: string | null
+        }
+        Update: {
+          created_at?: string
+          handle?: string
+          reason?: string
+          reserved_until?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      claim_handle: { Args: { new_handle: string }; Returns: string }
+      delete_account: { Args: never; Returns: undefined }
+      handle_available: { Args: { candidate: string }; Returns: boolean }
       keepalive: { Args: never; Returns: string }
     }
     Enums: {

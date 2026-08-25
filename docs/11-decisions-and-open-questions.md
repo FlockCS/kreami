@@ -148,6 +148,29 @@ original palette — it is the record of that decision, not live design.
 **Cost, accepted:** metadata is slightly heavier than drawn. The airiness of the direction
 comes from whitespace and the serif, not from pale metadata, so the character survives.
 
+---
+
+### D15 — `handle` is nullable until claimed
+**Chosen (2026-08-25):** a profile row is created by trigger the moment an auth user exists,
+with `handle` null until the person picks one through `claim_handle()`.
+**Why:** the trigger is what keeps the app from ever reading `auth.users` directly (D3's
+portability rule), but nobody has a handle at signup. A null handle is an honest "signed up,
+not yet onboarded" signal. Generating `user_a3f9` placeholders would pollute the namespace
+and make the first claim a *change*, subject to the 30-day cooldown.
+**Consequence:** every public read of `profiles` filters `handle is not null`. A
+half-onboarded account is invisible to everyone but itself.
+**Revised from:** [04 — Data Model](04-data-model.md), which specified `not null`.
+
+---
+
+### D16 — Column grants, not trust, protect handles and counters
+**Chosen:** `revoke all on profiles`, then `grant update (display_name, bio, avatar_url)`.
+**Why:** RLS decides which *rows* you may touch; it cannot stop you writing a column you
+should not. Without column grants, any signed-in user could `PATCH` their own
+`follower_count` or take a handle directly, bypassing the cooldown and the reservation list
+entirely. Counters are trigger-maintained and handles go through `claim_handle()`, so
+neither should be client-writable at all.
+
 ## Open questions
 
 Things genuinely unresolved. Each needs an answer eventually; none blocks Phase 0.

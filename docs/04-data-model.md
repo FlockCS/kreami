@@ -22,31 +22,57 @@ portability rule from [03](03-architecture.md). Everything joins to `profiles`.
 ```sql
 create table profiles (
   id            uuid primary key references auth.users(id) on delete cascade,
-  handle        text not null unique
-                check (handle ~ '^[a-z0-9_]{3,20}$'),
+  -- Null until claimed. See the note below.
+  handle        text unique check (handle ~ '^[a-z0-9_]{3,20}$'),
   display_name  text not null check (char_length(display_name) between 1 and 40),
   bio           text check (char_length(bio) <= 160),
   avatar_url    text,
-  kreami_count  integer not null default 0,
-  follower_count  integer not null default 0,
-  following_count integer not null default 0,
+  kreami_count  integer not null default 0 check (kreami_count >= 0),
+  follower_count  integer not null default 0 check (follower_count >= 0),
+  following_count integer not null default 0 check (following_count >= 0),
   is_suspended  boolean not null default false,
+  -- Null until the handle is changed for the first time; the initial claim is free.
+  handle_changed_at timestamptz,
   created_at    timestamptz not null default now()
 );
-
-create unique index profiles_handle_lower_idx on profiles (lower(handle));
 ```
+
+**`handle` is nullable, and that is deliberate** (revised in Phase 1). A profile row is
+created by trigger the instant an auth user exists — that is what keeps the app from ever
+reading `auth.users` directly — but the person has not chosen a handle at that moment. A
+null handle is the clean signal for "signed up, not yet onboarded". Generating a
+`user_a3f9` placeholder instead would pollute the namespace and turn the first claim into a
+*change*, subject to the cooldown below.
+
+**No `lower()` index is needed.** The check constraint already forbids uppercase, so the
+plain unique constraint is case-insensitive by construction.
+
+**Nothing writes `handle` directly.** It is settable only through `claim_handle()`, enforced
+by column-level grants rather than by convention — see
+[09 — Security & Moderation](09-security-moderation.md).
 
 Handle collisions with reserved words are blocked by a trigger, not a check constraint,
 so the reserved list can change without a migration:
 
 ```sql
-create table reserved_handles (handle text primary key);
-insert into reserved_handles values
-  ('admin'),('kreami'),('kream'),('about'),('settings'),('api'),
-  ('search'),('feed'),('discover'),('login'),('signup'),('help'),('support'),
-  ('t'),('u'),('k');
+create table reserved_handles (
+  handle         text primary key,
+  -- Null = permanent (route names, impersonation risks).
+  -- A timestamp = a handle released by a user, held for 90 days so it cannot be
+  -- used to inherit the audience built under it.
+  reserved_until timestamptz,
+  reason         text not null default 'system',
+  created_at     timestamptz not null default now()
+);
 ```
+
+Seeded with route names and impersonation risks: `admin`, `kreami`, `kream`, `official`,
+`staff`, `mod`, `support`, `about`, `settings`, `api`, `search`, `feed`, `discover`,
+`activity`, `login`, `signup`, `t`, `u`, `k`, and others — see the migration for the full
+list.
+
+**RLS is on with no policies at all**, so the table is unreachable from the client. Only the
+`security definer` functions consult it.
 
 ### topics
 

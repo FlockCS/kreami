@@ -48,8 +48,10 @@ deploys automatically.
 
 ## Phase 1 — Auth and identity (2–3 sessions)
 
-- [ ] `profiles` table, `reserved_handles`, RLS policies
-- [ ] Trigger creating a profile row on `auth.users` insert
+- [x] `profiles` table, `reserved_handles` (with expiry), RLS policies, column grants
+- [x] Trigger creating a profile row on `auth.users` insert
+- [x] `handle_available()`, `claim_handle()` (30-day cooldown, 90-day reservation),
+      `delete_account()` — all verified unreachable without a session
 - [ ] Google OAuth on web and native
 - [ ] Magic link with **Resend SMTP configured** — not the built-in sender
 - [ ] Deep link handling; **tested on a physical phone**

@@ -109,6 +109,25 @@ Idempotent toggles returning the new state and count. One call, no read-then-wri
 { liked: boolean, like_count: number }
 ```
 
+### `handle_available(candidate text)` → `boolean`
+Live availability check for the handle picker. True when the handle is well-formed,
+unreserved and unclaimed. Signed-in callers only.
+
+### `claim_handle(new_handle text)` → `text`
+Claims the caller's handle, or changes it. The first claim is free; subsequent changes are
+capped at one per **30 days**, and the vacated handle is reserved for **90 days**. Raises a
+human-readable message on cooldown, malformed input, or collision — the unique index is the
+final arbiter, so a race resolves to "not available" rather than a duplicate.
+
+### `delete_account()` → `void`
+Permanently deletes the calling user. Cascades from `auth.users` to the profile and, later,
+to Kreamis and edges. Required from v1 — see [09](09-security-moderation.md).
+
+### `keepalive()` → `timestamptz`
+Returns the server clock. Exists only so the scheduled workflow can force a real database
+round trip; it is the Postgres instance that pauses, and a health endpoint can answer
+without touching it. The one function deliberately granted to `anon`.
+
 ### `mark_notifications_read()`
 Sets `read_at = now()` on all unread rows for the caller.
 
