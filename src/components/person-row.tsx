@@ -1,5 +1,6 @@
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
+import { Avatar } from '@/components/avatar';
 import { useToggleFollow } from '@/lib/feed';
 import { useOpenProfile, type FollowRow } from '@/lib/profiles';
 import { colors } from '@/theme/tokens';
@@ -23,7 +24,9 @@ export function PersonRow({ person }: { person: FollowRow }) {
       onPress={() => openProfile(person.handle)}
       className="flex-row items-start gap-3 border-b border-rule py-4 active:bg-fill"
     >
-      <View className="mt-[2px] h-10 w-10 rounded-full" style={{ backgroundColor: colors.fill }} />
+      <View className="mt-[2px]">
+        <Avatar url={person.avatar_url} size={40} name={person.display_name} />
+      </View>
 
       <View className="flex-1">
         <Text className="font-serif text-[21px] leading-7 text-ink" numberOfLines={1}>

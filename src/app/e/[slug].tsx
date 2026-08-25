@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Avatar } from '@/components/avatar';
 import { Button } from '@/components/button';
 import { KreamRating } from '@/components/kream-rating';
 import { LoadError } from '@/components/load-error';
@@ -167,7 +168,7 @@ function ThreadRow({ kreami }: { kreami: KreamiWithAuthor }) {
     <View className="border-b border-rule py-5">
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
-          <View className="h-5 w-5 rounded-full" style={{ backgroundColor: colors.fill }} />
+          <Avatar url={author?.avatar_url} size={20} name={author?.display_name} />
           <Text className="font-sans text-[10px] tracking-tab text-ink">
             {(author?.handle ?? author?.display_name ?? 'someone').toUpperCase()}
           </Text>

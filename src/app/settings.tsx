@@ -56,6 +56,11 @@ export default function Settings() {
       <ScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 40 }}>
         <Label>PROFILE</Label>
         <Row
+          label="Photo"
+          value={profile.data?.avatar_url ? 'Set' : 'Not set'}
+          onPress={() => router.push('/edit-profile')}
+        />
+        <Row
           label="Display name"
           value={profile.data?.display_name}
           onPress={() => router.push('/edit-profile')}

@@ -130,6 +130,21 @@ Idempotent toggles returning the new state and count. One call, no read-then-wri
 { liked: boolean, like_count: number }
 ```
 
+### Avatars — Storage, not an RPC
+
+The one write path that is not a function. `avatars` is a public bucket holding
+`<user_id>/<timestamp>.jpg`, and the first path segment is the whole authorisation rule:
+policies on `storage.objects` let you insert, update and delete inside your own folder and
+nowhere else. Reads are public, because a Kreami's author is shown to logged-out visitors.
+
+The bucket rejects anything over 256 KB or outside `image/jpeg|png|webp`. The client crops
+to a centred square and resizes to 256×256 first, so those limits are a backstop against a
+client bug rather than something a user meets.
+
+`profiles.avatar_url` holds the public URL and is one of the three columns granted to
+`authenticated` (D16). A new filename on every upload is deliberate — it is what stops CDN
+and on-device image caches from serving the previous photo.
+
 ### `handle_available(candidate text)` → `boolean`
 Live availability check for the handle picker. True when the handle is well-formed,
 unreserved and unclaimed. Signed-in callers only.

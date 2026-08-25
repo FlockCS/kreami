@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 
+import { Avatar } from '@/components/avatar';
 import { Button } from '@/components/button';
 import { KreamRating } from '@/components/kream-rating';
 import { since } from '@/components/kreami-card';
@@ -52,7 +53,7 @@ export function ProfileView({
     <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
       <View className="px-6">
         <View className="flex-row items-center gap-4">
-          <View className="h-16 w-16 rounded-full" style={{ backgroundColor: colors.fill }} />
+          <Avatar url={profile.avatar_url} size={64} name={profile.display_name} />
           <View className="flex-1">
             <Text className="font-serif text-[30px] leading-9 text-ink">
               {profile.display_name}

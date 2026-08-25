@@ -54,6 +54,9 @@ deploys automatically.
       `delete_account()` — all verified unreachable without a session
 - [x] Session provider with restore-before-route, and the redirect guard
 - [x] Sign-in screen, handle picker with live availability, sign out, delete account
+- [x] Profile photos: `avatars` bucket with per-user write scoping, pick → crop → 256×256,
+      and the person glyph as the fallback *(landed late, with Phase 3 — it was never
+      assigned to a phase)*
 - [ ] Google OAuth on web and native
 - [ ] Magic link with **Resend SMTP configured** — not the built-in sender
 - [ ] Deep link handling; **tested on a physical phone**

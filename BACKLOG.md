@@ -60,6 +60,16 @@ somebody else signs up.
 
 ## Correctness and hygiene
 
+- [ ] **Edit profile loads blank on a cold open.** `useState(profile.data?.display_name ?? '')`
+      initialises before the profile query resolves, so opening `/edit-profile` directly —
+      a refresh on web, or a deep link — leaves the name field empty and Save disabled
+      until you navigate away and back. Invisible when arriving from Settings, because the
+      profile is already cached. Pre-existing; spotted while building the photo field.
+      *Trigger: the first person who refreshes that page.*
+- [ ] **Avatar upload is only exercised on web.** The picker was driven through the DOM in
+      the browser; `allowsEditing`, the iOS/Android crop UI, and the photo-library
+      permission prompt have never run on a device. *Trigger: first native build.*
+
 - [ ] **Decide on a test runner.** Node runs TypeScript directly, which covers one pure
       module, but Phase 1 has real logic worth testing (handle validation, session restore,
       deep-link parsing). Vitest is ~5 minutes. *Trigger: the next non-trivial pure module.*
@@ -155,7 +165,9 @@ Each of these has a written reason. Do not pick one up without re-reading it.
 - [ ] **OpenGraph Worker** for `/e/:slug` and `/u/:handle`. Static rendering covers fixed
       routes; user-generated URLs still render blank preview cards — and those are the ones
       people share. *Trigger: when link sharing matters.* (docs/03)
-- [ ] **Photos on a Kreami.** *Trigger: users repeatedly ask.*
+- [ ] **Photos on a Kreami.** Still deferred, and unaffected by avatars shipping: an avatar
+      is 5 KB of you, a photo on every Kreami is unbounded storage plus image moderation.
+      *Trigger: users repeatedly ask.*
 - [ ] **Push notifications.** *Trigger: retention is the bottleneck and in-app is not
       enough.*
 - [ ] **`feed_entries` fan-out-on-write.** *Trigger: home feed exceeds ~500 ms.* (docs/06)

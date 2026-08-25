@@ -2,6 +2,7 @@ import { Tabs, useRouter } from 'expo-router';
 import { Platform, type ColorValue } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
+import { PersonGlyph } from '@/components/avatar';
 import { colors, fonts } from '@/theme/tokens';
 
 type IconProps = { color: ColorValue };
@@ -37,18 +38,6 @@ const PlusIcon = () => (
   <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
     <Path d="M12 5v14" stroke={colors.paper} strokeWidth={1.9} strokeLinecap="round" />
     <Path d="M5 12h14" stroke={colors.paper} strokeWidth={1.9} strokeLinecap="round" />
-  </Svg>
-);
-
-const PersonIcon = ({ color }: IconProps) => (
-  <Svg {...S}>
-    <Circle cx={12} cy={8.5} r={3.5} stroke={color} strokeWidth={1.6} />
-    <Path
-      d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"
-      stroke={color}
-      strokeWidth={1.6}
-      strokeLinecap="round"
-    />
   </Svg>
 );
 
@@ -110,7 +99,7 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="me"
-        options={{ title: 'You', tabBarIcon: ({ color }) => <PersonIcon color={color} /> }}
+        options={{ title: 'You', tabBarIcon: ({ color }) => <PersonGlyph color={color} /> }}
       />
     </Tabs>
   );

@@ -72,6 +72,24 @@ async function rest(token, query) {
   return { status: r.status, body: await r.json().catch(() => null) };
 }
 
+/** A 1x1 PNG — small enough to be a literal, real enough for the bucket to accept it. */
+const PIXEL = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+  'base64',
+);
+
+function putAvatar(token, objectPath, contentType = 'image/png', body = PIXEL) {
+  return fetch(URL_BASE + '/storage/v1/object/avatars/' + objectPath, {
+    method: 'POST',
+    headers: {
+      apikey: ANON,
+      Authorization: 'Bearer ' + (token ?? ANON),
+      'Content-Type': contentType,
+    },
+    body,
+  });
+}
+
 async function makeUser(nick) {
   const email = `kreami+${nick}-${Date.now()}@example.com`;
   const r = await fetch(URL_BASE + '/auth/v1/signup', {
@@ -307,6 +325,50 @@ try {
     body: JSON.stringify({ kreami_id: edit.kreami_id, user_id: bob.id, body: 'direct' }),
   });
   check('nor can a reply be inserted directly', r.status >= 400, 'HTTP ' + r.status);
+
+  console.log('\nThe avatar bucket\n');
+  r = await putAvatar(alice.token, `${alice.id}/mine.png`);
+  check('you can write into your own folder', r.status < 400, 'HTTP ' + r.status);
+
+  const avatarUrl = `${URL_BASE}/storage/v1/object/public/avatars/${alice.id}/mine.png`;
+  r = await fetch(avatarUrl);
+  check('and anyone can read it back, signed in or not', r.status === 200, 'HTTP ' + r.status);
+
+  // The whole authorisation rule is the first path segment, so these are the
+  // checks that matter: a folder you do not own, and no folder at all.
+  r = await putAvatar(bob.token, `${alice.id}/stolen.png`);
+  check("cannot write into somebody else's folder", r.status >= 400, 'HTTP ' + r.status);
+
+  r = await putAvatar(alice.token, 'loose.png');
+  check('cannot write to the bucket root', r.status >= 400, 'HTTP ' + r.status);
+
+  r = await putAvatar(null, `${alice.id}/anon.png`);
+  check('anonymous callers cannot upload at all', r.status >= 400, 'HTTP ' + r.status);
+
+  r = await fetch(URL_BASE + `/storage/v1/object/avatars/${alice.id}/mine.png`, {
+    method: 'DELETE',
+    headers: { apikey: ANON, Authorization: 'Bearer ' + bob.token },
+  });
+  check("cannot delete somebody else's photo", r.status >= 400, 'HTTP ' + r.status);
+
+  // The two bucket-level limits. The client resizes to 256x256 before it
+  // uploads; these are what stands between a client bug and the free tier.
+  r = await putAvatar(
+    alice.token,
+    `${alice.id}/big.jpg`,
+    'image/jpeg',
+    Buffer.alloc(300 * 1024, 1),
+  );
+  check('the 256 KB ceiling is enforced', r.status >= 400, 'HTTP ' + r.status);
+
+  r = await putAvatar(alice.token, `${alice.id}/evil.html`, 'text/html', Buffer.from('<b>no</b>'));
+  check('non-image content types are rejected', r.status >= 400, 'HTTP ' + r.status);
+
+  r = await fetch(URL_BASE + `/storage/v1/object/avatars/${alice.id}/mine.png`, {
+    method: 'DELETE',
+    headers: { apikey: ANON, Authorization: 'Bearer ' + alice.token },
+  });
+  check('you can delete your own, which is how changing a photo works', r.status < 400);
 
   console.log('\nWhat a signed-in user must NOT be able to do\n');
   r = await rpc(bob.token, 'create_experience', { raw_title: 'sneaking one in' });

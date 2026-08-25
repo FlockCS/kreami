@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
+import { Avatar } from '@/components/avatar';
 import { KreamRating } from '@/components/kream-rating';
 import type { FeedItem } from '@/lib/feed';
 import { useOpenProfile } from '@/lib/profiles';
@@ -62,7 +63,7 @@ export function KreamiCard({
         onPress={() => openProfile(item.handle)}
         className="flex-row items-center gap-2"
       >
-        <View className="h-5 w-5 rounded-full" style={{ backgroundColor: colors.fill }} />
+        <Avatar url={item.avatar_url} size={20} name={item.display_name} />
         <Text className="font-sans text-[10px] tracking-tab text-ink">{author.toUpperCase()}</Text>
         <Text className="font-sans text-[10px] tracking-tab text-muted">·</Text>
         <Text className="font-sans text-[10px] tracking-tab text-muted">

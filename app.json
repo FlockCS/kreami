@@ -38,6 +38,13 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Kreami needs access to your photos so you can pick a profile picture.",
+          "cameraPermission": false
+        }
       ]
     ],
     "experiments": {
