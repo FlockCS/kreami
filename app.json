@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "kreami",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "ios": {
       "icon": "./assets/expo.icon",
       "supportsTablet": true,
