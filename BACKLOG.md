@@ -106,6 +106,12 @@ boundary tests deliberately cannot provide.
 
 ## Unverified — Phase 3
 
+- [ ] **A second account.** The follow graph cannot be tested with one user —
+      `toggle_follow` rejects self-follows by constraint, so following, follower counts and
+      a home feed containing somebody else's Kreami are all unverifiable until a second
+      account exists. Magic link is the cheapest way (any second email), but Supabase's
+      built-in SMTP allows only a few per hour. *Trigger: before the feed UI can be
+      verified at all — this gates the whole of Phase 3's verification.*
 - [ ] **Follow, like and reply round trips.** The toggles are idempotent and rate-limited,
       but nothing has followed, liked or replied to anything yet. *Trigger: the moment the
       feed UI exists.*
