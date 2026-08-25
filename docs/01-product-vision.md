@@ -20,8 +20,8 @@ This language is load-bearing. Use it in the UI, in the code, in the schema.
 |------|---------|
 | **Kream** | The unit of rating. "I gave it four Kreams." |
 | **Kreami** | One person's rating of one experience. A noun. "Leave a Kreami on it." |
-| **Topic** | A shared experience that Kreamis attach to. Has a title and an average. |
-| **Thread** | The list of Kreamis on a Topic, newest or best first. |
+| **Experience** | A shared experience that Kreamis attach to. Has a title and an average. |
+| **Thread** | The list of Kreamis on a Experience, newest or best first. |
 | **Kreamer** | A user. (Optional flavor — use sparingly, it's a lot.) |
 
 The scale is **0 to 5 whole Kreams**. Six values, no halves.
@@ -46,23 +46,23 @@ Two secondary motivations keep them coming back:
 1. **Posting must take under ten seconds.** Type, tap a number, done. The optional note is
    optional. Every second of friction here is the whole product dying quietly.
 2. **Never block a user from rating something.** If the dedupe pipeline can't find a match,
-   it creates a Topic. The user never sees an error, never gets told their experience is
+   it creates a Experience. The user never sees an error, never gets told their experience is
    invalid, never has to phrase it "correctly."
 3. **The scale is sacred.** No custom scales, no per-category scales, no "out of 10" mode.
    The universality of the number is the entire premise.
 4. **Public by default.** This is a consensus engine. Private ratings contribute nothing.
 5. **Text-first.** No photos in v1. The constraint keeps posts fast, cheap, and about the
    experience rather than the aesthetics of the experience.
-6. **Cold start is the real enemy.** Every design decision about topic matching exists to
-   make threads *dense* — many Kreamis on few Topics — rather than a graveyard of
-   one-rating topics. See [05 — Topic Matching](05-topic-matching.md).
+6. **Cold start is the real enemy.** Every design decision about experience matching exists to
+   make threads *dense* — many Kreamis on few Experiences — rather than a graveyard of
+   one-rating experiences. See [05 — Experience Matching](05-experience-matching.md).
 
 ## What Kreami is not
 
 - **Not a review site.** Notes are ~150 characters. There is no long-form review.
 - **Not a recommendation engine.** No algorithmic "you might like." Chronological feed.
 - **Not a places app.** No maps, no check-ins, no business listings, no Google Places
-  integration. "Eating at Joe's Pizza" is a Topic like any other — it gets no special
+  integration. "Eating at Joe's Pizza" is a Experience like any other — it gets no special
   entity treatment. This is the single biggest thing that separates Kreami from Beli,
   and it's what keeps the scope and the hosting bill small.
 - **Not a marketplace.** No monetization path in the plan. Not now.
@@ -71,7 +71,7 @@ Two secondary motivations keep them coming back:
 
 Not revenue. Not MAU. The things that tell you the premise holds:
 
-- **Thread density:** median Kreamis per Topic > 1 among topics older than a week.
+- **Thread density:** median Kreamis per Experience > 1 among experiences older than a week.
   If this stays at 1.0, deduplication is failing and the product doesn't work.
 - **Repeat posting:** a user's second Kreami within 48 hours of their first.
 - **Follow reciprocity:** people finding people worth following.

@@ -73,24 +73,24 @@ close the app, reopen it, and still be signed in.
 
 The heart of the product. If you build only this, you have something worth showing.
 
-- [x] `topics`, `topic_aliases`, `kreamis` tables with indexes and RLS
-- [x] `normalize_topic_title()`, `slugify()`, `create_topic()`, `resolve_topic()` (internal)
-- [x] `search_topics()` with the trigram index, `get_topic_by_slug()`, `topic_distribution()`
-- [x] `post_kreami()` with rate limiting, and `merge_topics()`
-- [x] Counter triggers + `recompute_topic_aggregates()`
-- [x] **`topic_resolution_log` writing from day one** — it is the evidence that decides
+- [x] `experiences`, `experience_aliases`, `kreamis` tables with indexes and RLS
+- [x] `normalize_experience_title()`, `slugify()`, `create_experience()`, `resolve_experience()` (internal)
+- [x] `search_experiences()` with the trigram index, `get_experience_by_slug()`, `experience_distribution()`
+- [x] `post_kreami()` with rate limiting, and `merge_experiences()`
+- [x] Counter triggers + `recompute_experience_aggregates()`
+- [x] **`experience_resolution_log` writing from day one** — it is the evidence that decides
       whether the exact-match rule survives the beta
 - [x] Web layout constrained to a centred column
 - [ ] `KreamRating` component: display and input, with 0 visually distinct from unrated
 - [ ] Compose flow: text → live search → resolve → rate → post (two steps, no confirmation)
-- [ ] Topic thread screen with histogram and sort tabs
+- [ ] Experience thread screen with histogram and sort tabs
 - [ ] Your own profile listing your Kreamis
 
 **Done when:** you can post a Kreami, have a friend post on the same experience by typing
 something slightly different, and land in the same thread.
 
 > This is the phase to slow down on. The matching pipeline in
-> [05](05-topic-matching.md) is the product. Everything after this is a list view.
+> [05](05-experience-matching.md) is the product. Everything after this is a list view.
 
 ---
 
@@ -111,13 +111,13 @@ something slightly different, and land in the same thread.
 
 ## Phase 4 — Discovery and activity (2–3 sessions)
 
-- [ ] Discover screen: search + `active_topics()`
+- [ ] Discover screen: search + `active_experiences()`
 - [ ] User search by handle and display name
-- [ ] `notifications` table + triggers, with the **24h `topic_activity` cap**
+- [ ] `notifications` table + triggers, with the **24h `experience_activity` cap**
 - [ ] Activity tab, unread badge, mark-all-read
 - [ ] `suggested_profiles` table and the onboarding follow step
 
-**Done when:** a brand-new account can find people and topics without knowing anyone.
+**Done when:** a brand-new account can find people and experiences without knowing anyone.
 
 ---
 
@@ -126,17 +126,17 @@ something slightly different, and land in the same thread.
 - [ ] Onboarding: 4 screens, ending in "leave your first Kreami"
 - [ ] Report flow + `reports` table
 - [ ] Admin SQL views: report queue, duplicate candidates, resolution-log stats
-- [ ] `merge_topics()` + nightly duplicate-candidate report
+- [ ] `merge_experiences()` + nightly duplicate-candidate report
 - [ ] Nightly counter reconciliation
-- [ ] **OpenGraph Worker** for `/t/:slug` and `/u/:handle` — link previews
+- [ ] **OpenGraph Worker** for `/e/:slug` and `/u/:handle` — link previews
 - [ ] Sentry
 - [ ] Full [security checklist](09-security-moderation.md#pre-launch-checklist)
-- [ ] Seed 50–100 Topics yourself so the app isn't empty on day one
+- [ ] Seed 50–100 Experiences yourself so the app isn't empty on day one
 
 **Done when:** the checklist passes and a shared link renders a real preview card.
 
 > **Seeding is not optional.** An empty rating app is unusable — the first ten users need
-> threads to join, or they'll each create a lonely Topic and leave. Write 50–100 Kreamis on
+> threads to join, or they'll each create a lonely Experience and leave. Write 50–100 Kreamis on
 > obviously universal experiences before anyone else sees it.
 
 ---
@@ -147,17 +147,17 @@ Not a build phase. 20–50 people you know.
 
 **Watch these three numbers.** They're the ones the design is betting on:
 
-1. **Median Kreamis per Topic** (topics older than 7 days). If it stays at 1.0, the
+1. **Median Kreamis per Experience** (experiences older than 7 days). If it stays at 1.0, the
    exact-match rule is fragmenting the corpus and search-as-you-type isn't catching enough
    people before they type a duplicate. **This is the most important number in the app**, and
    under the exact-match rule it is also the number most at risk.
 2. **Share of posts resolving to `new`** in the resolution log — and, by eye, how many of
-   those are near-misses of a Topic that already existed. That ratio is the direct measure of
+   those are near-misses of a Experience that already existed. That ratio is the direct measure of
    what the exact-match rule is costing.
 3. **Second-post rate within 48 hours.** The retention signal that matters.
 
 If (1) sits near 1.0 and (2) is full of near-misses, the remedies are ready and ordered in
-[05 — Topic Matching](05-topic-matching.md): strip punctuation in normalization first, then
+[05 — Experience Matching](05-experience-matching.md): strip punctuation in normalization first, then
 reinstate the fuzzy confirmation step if that isn't enough.
 
 ---
@@ -171,8 +171,8 @@ reinstate the fuzzy confirmation step if that isn't enough.
 | Photos | Users repeatedly ask; accept the storage and moderation cost |
 | Native app store release | Web has traction. Costs $99/yr + $25 |
 | `feed_entries` fan-out | Home feed exceeds ~500 ms |
-| Materialized `active_topics` | Discover exceeds ~200 ms |
-| Embedding-based dedupe | Duplicate report fills with semantic pairs ([05](05-topic-matching.md)) |
+| Materialized `active_experiences` | Discover exceeds ~200 ms |
+| Embedding-based dedupe | Duplicate report fills with semantic pairs ([05](05-experience-matching.md)) |
 | Pairwise comparison ranking | Users want personal ranked lists |
 | Private accounts | Repeatedly requested — and re-read [11](11-decisions-and-open-questions.md) first |
 
@@ -183,5 +183,5 @@ reinstate the fuzzy confirmation step if that isn't enough.
 **16–23 sessions to a private beta.** At two sessions a week, roughly **two to three months**.
 
 The estimate is honest about where it will slip: **Phase 2 will take longer than written**,
-because topic matching is a real problem with a real feedback loop, not a CRUD screen. If a
+because experience matching is a real problem with a real feedback loop, not a CRUD screen. If a
 phase is going to overrun, let it be that one — it's the only one where extra care compounds.

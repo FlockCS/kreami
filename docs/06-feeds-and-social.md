@@ -5,8 +5,8 @@
 | Feed | Contents | Who it's for |
 |------|----------|--------------|
 | **Home** | Kreamis from people you follow, newest first | Returning users with a graph |
-| **Discover** | Global recent + active topics | New users, and the answer to cold start |
-| **Topic thread** | All Kreamis on one Topic | Anyone arriving from a link or search |
+| **Discover** | Global recent + active experiences | New users, and the answer to cold start |
+| **Experience thread** | All Kreamis on one Experience | Anyone arriving from a link or search |
 
 ## Home feed
 
@@ -19,8 +19,8 @@ returns table (
   kreami_id uuid, rating smallint, note text, created_at timestamptz,
   like_count int, reply_count int, liked_by_me boolean,
   user_id uuid, handle text, display_name text, avatar_url text,
-  topic_id uuid, topic_title text, topic_slug text,
-  topic_avg numeric, topic_kreami_count int
+  experience_id uuid, experience_title text, experience_slug text,
+  experience_avg numeric, experience_kreami_count int
 )
 language sql stable security definer as $$
   select k.id, k.rating, k.note, k.created_at,
@@ -34,7 +34,7 @@ language sql stable security definer as $$
          t.kreami_count
     from kreamis k
     join profiles p on p.id = k.user_id
-    join topics   t on t.id = k.topic_id
+    join experiences   t on t.id = k.experience_id
    where k.is_hidden = false
      and p.is_suspended = false
      and (k.user_id = auth.uid()                          -- your own posts
@@ -75,10 +75,10 @@ Two tabs, both cheap:
 
 **Recent** — global chronological, same query minus the follow filter.
 
-**Active topics** — the ranked list that fights cold start:
+**Active experiences** — the ranked list that fights cold start:
 
 ```sql
-create or replace function active_topics(lim int default 20)
+create or replace function active_experiences(lim int default 20)
 returns table (id uuid, title text, slug text, kreami_count int,
                avg_kreams numeric, recent_count int)
 language sql stable as $$
@@ -86,9 +86,9 @@ language sql stable as $$
          case when t.kreami_count >= 3
               then round(t.rating_sum::numeric / t.kreami_count, 1) end,
          count(k.id) filter (where k.created_at > now() - interval '7 days')::int
-    from topics t
-    left join kreamis k on k.topic_id = t.id and k.is_hidden = false
-   where t.merged_into_topic_id is null and t.is_hidden = false
+    from experiences t
+    left join kreamis k on k.experience_id = t.id and k.is_hidden = false
+   where t.merged_into_experience_id is null and t.is_hidden = false
    group by t.id
   having count(k.id) > 0
    order by count(k.id) filter (where k.created_at > now() - interval '7 days') desc,
@@ -101,12 +101,12 @@ This aggregate scans; it's fine at small scale and should be a **materialized vi
 hourly** the moment it isn't. That's a `create materialized view` plus a cron — do it when the
 query exceeds ~200 ms, not before.
 
-**Why "active topics" matters more than it looks:** it's the surface that teaches new users
-what a Topic is and gives them something to join. A user whose first action is *adding* a
+**Why "active experiences" matters more than it looks:** it's the surface that teaches new users
+what a Experience is and gives them something to join. A user whose first action is *adding* a
 Kreami to a thread with 30 others has understood the product. A user whose first action is
-creating a lonely new Topic hasn't.
+creating a lonely new Experience hasn't.
 
-## Topic thread
+## Experience thread
 
 Default sort is **newest first**. Two alternates worth offering:
 
@@ -114,10 +114,10 @@ Default sort is **newest first**. Two alternates worth offering:
 - **Highest / Lowest** — by rating. Lets you jump straight to the 0/5s, which is the single
   most entertaining thing in the app and should be easy to reach.
 
-Above the thread sits the Topic header: title, average Kreams, count, and a
+Above the thread sits the Experience header: title, average Kreams, count, and a
 **rating distribution histogram** — six bars, 0 through 5. It's cheap
 (`select rating, count(*) ... group by rating`), it's genuinely informative, and it's the
-thing people screenshot. A topic that's bimodal — lots of 0s *and* lots of 5s — is a
+thing people screenshot. A experience that's bimodal — lots of 0s *and* lots of 5s — is a
 better story than one that averages 2.5, and only the histogram shows that.
 
 ## Notifications
@@ -138,20 +138,20 @@ begin
 end $$;
 ```
 
-The interesting one is **`topic_activity`**: when someone rates a Topic you've already rated,
+The interesting one is **`experience_activity`**: when someone rates a Experience you've already rated,
 you get told. This is the retention loop that has nothing to do with the follow graph — it
 pulls you back to a thread you cared about even if you follow nobody.
 
-Guard it against noise: **cap it at one notification per topic per user per 24 hours**, or a
-popular topic will bury everything else in the activity tab.
+Guard it against noise: **cap it at one notification per experience per user per 24 hours**, or a
+popular experience will bury everything else in the activity tab.
 
 ```sql
--- inside notify_on_kreami(), before inserting topic_activity rows:
+-- inside notify_on_kreami(), before inserting experience_activity rows:
 and not exists (
   select 1 from notifications n
    where n.user_id = participant.id
-     and n.kind = 'topic_activity'
-     and n.topic_id = new.topic_id
+     and n.kind = 'experience_activity'
+     and n.experience_id = new.experience_id
      and n.created_at > now() - interval '24 hours'
 )
 ```

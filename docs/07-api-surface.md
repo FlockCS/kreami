@@ -11,20 +11,20 @@ should have been one RPC.
 
 ## RPC catalog
 
-### `resolve_topic(raw_title text)` — **internal, not callable by clients**
-Resolves free-form text to a Topic, creating one when nothing matches exactly, and writes a
-row to `topic_resolution_log`. Granted to nobody; only `post_kreami()` calls it.
+### `resolve_experience(raw_title text)` — **internal, not callable by clients**
+Resolves free-form text to a Experience, creating one when nothing matches exactly, and writes a
+row to `experience_resolution_log`. Granted to nobody; only `post_kreami()` calls it.
 
-The reason it is not exposed: calling it is what *creates* a topic, so a client that resolved
-in order to preview would leave a zero-Kreami topic behind every time someone changed their
-mind. See [05 — Topic Matching](05-topic-matching.md).
+The reason it is not exposed: calling it is what *creates* a experience, so a client that resolved
+in order to preview would leave a zero-Kreami experience behind every time someone changed their
+mind. See [05 — Experience Matching](05-experience-matching.md).
 
-### `get_topic_by_slug(s text)` → `setof topics`
-Returns the Topic for a slug, transparently following `merged_into_topic_id` so old shared
+### `get_experience_by_slug(s text)` → `setof experiences`
+Returns the Experience for a slug, transparently following `merged_into_experience_id` so old shared
 links keep working. Returns **no row** for an unknown slug — deliberately `setof` rather than
 a composite, which would have come back as an object with every field null.
 
-### `search_topics(q text, lim int)`
+### `search_experiences(q text, lim int)`
 Autocomplete. Called on every keystroke (debounced 250 ms). Must stay under ~50 ms.
 
 ```ts
@@ -32,14 +32,14 @@ Array<{ id, title, slug, kreami_count, avg_kreams: number | null, score: number 
 ```
 
 ### `post_kreami(raw_title text, rating smallint, note text)`
-The single write that matters. Resolves the Topic, upserts the Kreami, fires all triggers —
+The single write that matters. Resolves the Experience, upserts the Kreami, fires all triggers —
 **atomically**. The client never resolves and then posts as two calls; a failure between them
-would create an orphan Topic.
+would create an orphan Experience.
 
 ```sql
 create or replace function post_kreami(
   raw_title text, rating smallint, note text default null
-) returns table (kreami_id uuid, topic_id uuid, topic_slug text, was_edit boolean)
+) returns table (kreami_id uuid, experience_id uuid, experience_slug text, was_edit boolean)
 language plpgsql security definer as $$
 declare tid uuid; existing uuid;
 begin
@@ -47,22 +47,22 @@ begin
   if rating < 0 or rating > 5 then raise exception 'Rating must be 0-5'; end if;
   perform assert_rate_limit('post_kreami', 30, interval '1 hour');
 
-  select r.topic_id into tid from resolve_topic(raw_title) r;
+  select r.experience_id into tid from resolve_experience(raw_title) r;
 
   select id into existing from kreamis
-   where user_id = auth.uid() and topic_id = tid;
+   where user_id = auth.uid() and experience_id = tid;
 
   if existing is not null then
     update kreamis set rating = post_kreami.rating,
                        note = post_kreami.note,
                        updated_at = now()
      where id = existing;
-    return query select existing, tid, (select slug from topics where id = tid), true;
+    return query select existing, tid, (select slug from experiences where id = tid), true;
   else
-    insert into kreamis (user_id, topic_id, rating, note)
+    insert into kreamis (user_id, experience_id, rating, note)
     values (auth.uid(), tid, post_kreami.rating, post_kreami.note)
     returning id into existing;
-    return query select existing, tid, (select slug from topics where id = tid), false;
+    return query select existing, tid, (select slug from experiences where id = tid), false;
   end if;
 end $$;
 ```
@@ -71,7 +71,7 @@ end $$;
 honesty that prevents users thinking they double-posted.
 
 If the fuzzy confirmation step is ever reinstated
-([05 — Topic Matching](05-topic-matching.md), *Deferred*), it comes back as a `force_new
+([05 — Experience Matching](05-experience-matching.md), *Deferred*), it comes back as a `force_new
 boolean default false` parameter here, set by the escape hatch. Nothing else changes.
 
 ### `home_feed(before timestamptz, lim int)`
@@ -81,14 +81,14 @@ Keyset-paginated following feed. See [06](06-feeds-and-social.md).
 Same shape, no follow filter. Same TypeScript type, so the client renders both with one
 component.
 
-### `active_topics(lim int)`
+### `active_experiences(lim int)`
 Discovery ranking.
 
-### `topic_thread(slug text, sort text, before timestamptz, lim int)`
-Kreamis on one Topic. `sort` ∈ `'recent' | 'top' | 'highest' | 'lowest'`.
-Transparently follows `merged_into_topic_id`.
+### `experience_thread(slug text, sort text, before timestamptz, lim int)`
+Kreamis on one Experience. `sort` ∈ `'recent' | 'top' | 'highest' | 'lowest'`.
+Transparently follows `merged_into_experience_id`.
 
-### `topic_distribution(topic_id uuid)`
+### `experience_distribution(experience_id uuid)`
 Six rows for the histogram.
 
 ```ts
@@ -136,7 +136,7 @@ Sets `read_at = now()` on all unread rows for the caller.
 Files a report. Rate-limited to 10/hour to prevent report-spam as a harassment vector.
 
 ### Admin-only (service role, never callable by `authenticated`)
-`merge_topics(loser, winner)` · `hide_kreami(id)` · `suspend_user(id)` ·
+`merge_experiences(loser, winner)` · `hide_kreami(id)` · `suspend_user(id)` ·
 `duplicate_candidates(lim)`
 
 ## Direct table reads via PostgREST
@@ -146,7 +146,7 @@ Fine to do from the client because RLS covers them:
 ```ts
 // A user's Kreamis, paginated
 supabase.from('kreamis')
-  .select('id, rating, note, created_at, like_count, reply_count, topics(title, slug)')
+  .select('id, rating, note, created_at, like_count, reply_count, experiences(title, slug)')
   .eq('user_id', userId)
   .order('created_at', { ascending: false })
   .lt('created_at', cursor)
@@ -179,7 +179,7 @@ export function usePostKreami() {
     },
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ['home_feed'] });
-      qc.invalidateQueries({ queryKey: ['topic', res.topic_slug] });
+      qc.invalidateQueries({ queryKey: ['experience', res.experience_slug] });
       qc.invalidateQueries({ queryKey: ['profile', 'me'] });
     },
   });
@@ -188,7 +188,7 @@ export function usePostKreami() {
 
 **Optimistic updates for likes and follows only.** They're trivially reversible and the
 latency is the whole UX. Do *not* optimistically render a posted Kreami — the server decides
-which Topic it lands on, and guessing wrong means showing the user the wrong thread.
+which Experience it lands on, and guessing wrong means showing the user the wrong thread.
 
 ## Errors
 
@@ -197,7 +197,7 @@ Postgres exceptions arrive as `{ message, code }`. Map them to human copy in one
 | Raised | Shown |
 |--------|-------|
 | `Rating must be 0-5` | "Pick a rating from 0 to 5 Kreams." |
-| `Topic title too short` | "Say a little more about the experience." |
+| `Experience title too short` | "Say a little more about the experience." |
 | `Rate limit exceeded: post_kreami` | "Slow down — you've posted a lot in the last hour." |
 | `Not authenticated` | Redirect to sign-in, preserving the draft. |
 
@@ -210,5 +210,5 @@ Supabase Realtime is available and free up to 200 concurrent connections. **Don'
 v1.** Live-updating feeds are a novelty here, the connection budget is small, and a
 pull-to-refresh is understood by everyone.
 
-The one place worth it later: **live updates on an open Topic thread**, so a busy thread
+The one place worth it later: **live updates on an open Experience thread**, so a busy thread
 visibly moves while you're reading it. That's a nice moment. It's Phase 5+.

@@ -41,24 +41,24 @@ impersonation: build a following as `@kreami_official`, hand the handle off, tak
 Gate changes behind an RPC that enforces a cooldown (one change per 30 days) and reserves
 the old handle for 90 days.
 
-### topics
+### experiences
 ```sql
-alter table topics enable row level security;
+alter table experiences enable row level security;
 
-create policy topics_public_read on topics
+create policy experiences_public_read on experiences
   for select using (is_hidden = false);
 
 -- Creation only through the RPC, never a raw insert.
-create policy topics_no_direct_insert on topics
+create policy experiences_no_direct_insert on experiences
   for insert with check (false);
 ```
 
-Direct inserts are blocked entirely. If the client could insert Topics, it would bypass
+Direct inserts are blocked entirely. If the client could insert Experiences, it would bypass
 normalization, slug generation, and dedupe — and the whole matching pipeline in
-[05](05-topic-matching.md) becomes optional. `create_topic()` is `security definer` and is
+[05](05-experience-matching.md) becomes optional. `create_experience()` is `security definer` and is
 the only path in.
 
-**Nobody can edit a Topic title.** A Topic with 200 Kreamis attached is a shared object;
+**Nobody can edit a Experience title.** A Experience with 200 Kreamis attached is a shared object;
 letting anyone rename it retroactively changes what 200 people rated. Renames are admin-only,
 and only for typo fixes.
 
@@ -165,7 +165,7 @@ end $$;
 | Action | Limit | Why |
 |--------|-------|-----|
 | `post_kreami` | 30 / hour | Generous for humans, ruinous for a script |
-| `create_topic` | 10 / hour | Topic spam pollutes search for everyone — the tightest limit |
+| `create_experience` | 10 / hour | Experience spam pollutes search for everyone — the tightest limit |
 | `follow` | 100 / hour | Mass-follow is the #1 growth-spam pattern |
 | `reply` | 60 / hour | |
 | `submit_report` | 10 / hour | Report-flooding is itself a harassment tool |
@@ -177,7 +177,7 @@ it becomes the biggest table in the database.
 ## Content moderation
 
 ### At creation
-A lightweight blocklist check on Topic titles inside `create_topic()` — slurs and obvious
+A lightweight blocklist check on Experience titles inside `create_experience()` — slurs and obvious
 spam patterns. **Deliberately minimal.** An aggressive filter on an app whose premise is
 "rate anything" will reject legitimate experiences constantly, and each false positive is a
 user who stops posting. Titles are public and permanent, which is the only reason to filter
@@ -189,7 +189,7 @@ Supabase dashboard SQL view. At v1 volume this is **a few minutes a week**, and 
 admin UI before you have reports is premature. Build it when the queue takes longer to read
 than to build.
 
-Actions available: hide a Kreami/Reply (`is_hidden = true`, reversible), hide a Topic,
+Actions available: hide a Kreami/Reply (`is_hidden = true`, reversible), hide a Experience,
 suspend a user (`is_suspended = true`, hides all their content via the read policies).
 
 **Everything is a soft hide.** Never hard-delete user content in response to a report —
@@ -223,7 +223,7 @@ becomes the top priority — ahead of any feature on the roadmap.
 - **Account deletion must actually work.** `delete from auth.users` cascades to profiles,
   Kreamis, follows, and likes. Offer it in settings from v1 — it's a GDPR/CCPA requirement
   and it's a five-line RPC.
-- Topic *aggregates* survive a user deletion (the rating_sum is recomputed), which is correct
+- Experience *aggregates* survive a user deletion (the rating_sum is recomputed), which is correct
   — but confirm that no deleted user's handle survives anywhere, including in old
   notification rows.
 
@@ -235,7 +235,7 @@ becomes the top priority — ahead of any feature on the roadmap.
 - [ ] Rate limits active on all six actions
 - [ ] Custom SMTP configured and a magic link tested end-to-end on a real phone
 - [ ] Account deletion tested end-to-end
-- [ ] Anonymous read verified working on `/t/:slug` in a logged-out browser
+- [ ] Anonymous read verified working on `/e/:slug` in a logged-out browser
 - [ ] Anonymous *write* verified **blocked** on every table
 - [ ] Nightly counter reconciliation job running
 - [ ] Supabase keepalive cron running

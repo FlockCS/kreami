@@ -30,8 +30,8 @@ somebody else signs up.
       `signInWithIdToken`, so the browser never leaves our origin (free, more client code);
       or a Supabase custom domain, which needs a **paid plan plus the add-on**. *Trigger:
       before anyone but you signs in — this is a trust problem, not a polish one.*
-- [ ] **Seed 50–100 topics.** An empty rating app is unusable; the first ten users need
-      threads to join or they each create a lonely topic and leave. *Trigger: before the
+- [ ] **Seed 50–100 experiences.** An empty rating app is unusable; the first ten users need
+      threads to join or they each create a lonely experience and leave. *Trigger: before the
       private beta.* (docs/10 Phase 5)
 
 ## Blocks deployment
@@ -73,21 +73,49 @@ somebody else signs up.
       to commit the generated file or generate it in the workflow. *Trigger: the first
       route typo that reaches main.*
 
+## Unverified
+
+Built but never exercised. Each needs an authenticated session or real data, which the
+boundary tests deliberately cannot provide.
+
+- [ ] **The matching pipeline end to end.** `post_kreami` joining an existing experience on
+      exact match, creating one otherwise, the one-per-user constraint turning a second post
+      into an edit, and the resolution log recording all three outcomes. *Trigger: the moment
+      the compose UI exists — this is the product, and none of it has run once.*
+- [ ] **Slug collision handling.** `create_experience` retries with a numbered suffix when two
+      different titles slugify the same ("jury duty" and "jury duty!"). The retry loop has
+      never executed.
+- [ ] **Rate limits.** 30 posts/hour and 10 new experiences/hour. Never tripped.
+- [ ] **`merge_experiences`.** The only repair the exact-match rule has, and it has never been
+      run. It is also granted to *nobody* — it needs the service role, so there is currently
+      no way to invoke it outside a SQL console. *Trigger: the first real duplicate.*
+- [ ] **Counter triggers under concurrency.** `kreami_count` and `rating_sum` are
+      trigger-maintained; drift only shows up under real load.
+
+## Not built yet
+
+- [ ] **Admin surface.** No way to review reports, run merges, or read the duplicate-candidate
+      report except by hand in the Supabase SQL editor. Fine at this size; note when it stops
+      being fine. (docs/10 Phase 5)
+- [ ] **Experience thread as an RPC.** Currently intended as a direct PostgREST query with an
+      embedded profile join. If sort variants or pagination get awkward, promote it to a
+      function. (docs/07)
+
 ## Deferred by design
 
 Each of these has a written reason. Do not pick one up without re-reading it.
 
 - [ ] **Fuzzy "Did you mean?" matching.** Screen is drawn and marked DEFERRED on the canvas.
-      *Trigger: median Kreamis per Topic sits near 1.0 in the beta.* (docs/05, docs/11 Q3)
-- [ ] **Strip punctuation in `normalize_topic_title`.** The cheaper remedy to try first.
-- [ ] **OpenGraph Worker** for `/t/:slug` and `/u/:handle`. Static rendering covers fixed
+      *Trigger: median Kreamis per Experience sits near 1.0 in the beta.* (docs/05, docs/11 Q3)
+- [ ] **Strip punctuation in `normalize_experience_title`.** The cheaper remedy to try first.
+- [ ] **OpenGraph Worker** for `/e/:slug` and `/u/:handle`. Static rendering covers fixed
       routes; user-generated URLs still render blank preview cards — and those are the ones
       people share. *Trigger: when link sharing matters.* (docs/03)
 - [ ] **Photos on a Kreami.** *Trigger: users repeatedly ask.*
 - [ ] **Push notifications.** *Trigger: retention is the bottleneck and in-app is not
       enough.*
 - [ ] **`feed_entries` fan-out-on-write.** *Trigger: home feed exceeds ~500 ms.* (docs/06)
-- [ ] **Materialised `active_topics`.** *Trigger: discover exceeds ~200 ms.*
+- [ ] **Materialised `active_experiences`.** *Trigger: discover exceeds ~200 ms.*
 - [ ] **Embedding-based dedupe.** *Trigger: the duplicate report fills with semantic pairs
       trigram scored below 0.5.* (docs/05)
 - [ ] **Pairwise comparison ranking.** (docs/11 D8)
@@ -101,10 +129,10 @@ you, not code from me.
 - [ ] **What does a Kream actually look like?** The dollop is a first pass and it carries the
       entire visual identity. (Q2)
 - [ ] **Does exact-match fragment the corpus?** The number to watch is median Kreamis per
-      Topic. (Q3)
-- [ ] **Should users be able to propose topic merges?** Admin-only does not scale past a few
+      Experience. (Q3)
+- [ ] **Should users be able to propose experience merges?** Admin-only does not scale past a few
       hundred users. (Q5)
-- [ ] **How do you seed the first hundred topics?** Ideal seed is maximally universal and
+- [ ] **How do you seed the first hundred experiences?** Ideal seed is maximally universal and
       mildly contentious. (Q7)
 - [ ] **Is "Kreamer" the word for a user?** (Q8)
 

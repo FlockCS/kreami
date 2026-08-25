@@ -15,15 +15,15 @@ Expo Router maps these to real URLs, so the web export gets shareable links for 
 | Route | URL | Screen |
 |-------|-----|--------|
 | `(tabs)/index` | `/` | Home feed |
-| `(tabs)/discover` | `/discover` | Search + active topics |
+| `(tabs)/discover` | `/discover` | Search + active experiences |
 | `(tabs)/post` | `/post` | Compose (modal on native) |
 | `(tabs)/activity` | `/activity` | Notifications |
 | `(tabs)/profile` | `/me` | Your profile |
-| `t/[slug]` | `/t/eating-a-candy-apple` | Topic thread |
+| `t/[slug]` | `/e/eating-a-candy-apple` | Experience thread |
 | `u/[handle]` | `/u/manish` | Someone's profile |
 | `k/[id]` | `/k/:id` | Single Kreami permalink |
 
-`/t/:slug` and `/k/:id` are the **shareable** URLs. They must render for logged-out visitors
+`/e/:slug` and `/k/:id` are the **shareable** URLs. They must render for logged-out visitors
 — that's the entire top of the funnel, and it's why anonymous read access exists in the RLS
 policies.
 
@@ -49,7 +49,7 @@ never on its own, and at 0 it is set in the accent color:
   ○○○○○  0/5 Kreams         ← right: the numeral is present and accented
 ```
 
-An unrated Topic never shows a glyph row at all — it shows "Not enough Kreamis yet" — so the
+An unrated Experience never shows a glyph row at all — it shows "Not enough Kreamis yet" — so the
 two states never actually collide in the UI.
 
 **Input:** six tap targets, 0 through 5, each at least 44×44 pt. On mobile, support drag
@@ -71,19 +71,19 @@ flowchart TD
     B --> C[Types 2+ chars]
     C --> D["Live results beneath the field:<br/>title · avg · count"]
     D --> E{Taps a result?}
-    E -->|Yes| F[Rating step, topic locked]
+    E -->|Yes| F[Rating step, experience locked]
     E -->|No| G[Taps Next]
-    G --> H{resolve_topic}
+    G --> H{resolve_experience}
     H -->|exact match or alias| F
-    H -->|no match: new topic| F
+    H -->|no match: new experience| F
     F --> K["Six Kream targets<br/>+ optional 150-char note"]
     K --> L[Post]
-    L --> M["Lands on the topic thread,<br/>their Kreami at top"]
+    L --> M["Lands on the experience thread,<br/>their Kreami at top"]
 ```
 
 **Two steps, always.** Text, then rating. The note lives on the rating step as an optional
 field, not a separate screen. There is no confirmation step between them — an exact match
-joins silently, anything else creates a Topic silently.
+joins silently, anything else creates a Experience silently.
 
 **The results list is the whole deduplication strategy.** Under the exact-match rule nothing
 downstream catches a near-duplicate, so this list has to be fast, generous, and impossible to
@@ -94,11 +94,11 @@ makes tapping more attractive than typing.
 shows the user what they joined, and if others are there, it delivers the core payoff
 immediately.
 
-### If they've already rated this Topic
+### If they've already rated this Experience
 
 Don't error and don't silently overwrite. The rating step pre-fills with their existing
 Kreami and the button reads **"Update your Kreami"** — with the original date shown. Honest,
-and it makes the one-per-topic rule feel like a feature rather than a rejection.
+and it makes the one-per-experience rule feel like a feature rather than a rejection.
 
 ## Home feed card
 
@@ -116,11 +116,11 @@ and it makes the one-per-topic rule feel like a feature rather than a rejection.
 └────────────────────────────────────────────┘
 ```
 
-The Topic's average and count sit in the corner as a **tappable affordance into the thread**.
+The Experience's average and count sit in the corner as a **tappable affordance into the thread**.
 That's the mechanism that converts a passive feed reader into a thread participant, and it's
 worth the visual clutter.
 
-## Topic thread
+## Experience thread
 
 ```
 ┌────────────────────────────────────────────┐
@@ -200,7 +200,7 @@ metric. Make that the last screen's primary action.
 |-------|--------------|
 | Home feed, no follows | Discover feed inline: *"Follow people to build your feed. Meanwhile:"* |
 | Home feed, few follows | Backfill with global, visually distinct, capped at half the page |
-| Topic with 1–2 Kreamis | *"Not enough Kreamis for an average yet"* — never a misleading 5.0 |
+| Experience with 1–2 Kreamis | *"Not enough Kreamis for an average yet"* — never a misleading 5.0 |
 | Search, no results | *"Nobody's rated that yet. Be first."* → straight into compose |
 | Activity, empty | *"Nothing yet. Kreamis you leave will show up here when people react."* |
 | Offline | Cached feed with a banner. TanStack Query persistence handles this. |

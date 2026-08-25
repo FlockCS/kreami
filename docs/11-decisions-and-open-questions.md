@@ -38,9 +38,9 @@ a real backend.
 
 ---
 
-### D4 — Free-form topic entry, exact-match resolution
+### D4 — Free-form experience entry, exact-match resolution
 **Chosen (revised 2026-08-24):** users type anything. An **exact match ignoring case** joins
-that thread and cannot create a duplicate; anything else becomes a new Topic, with no
+that thread and cannot create a duplicate; anything else becomes a new Experience, with no
 confirmation step. Normalization is lowercase, trim, collapse inner whitespace — nothing else.
 **Why:** the simplest rule that is predictable to a user. No machine guess ever sits between
 someone and posting, and "cannot create a duplicate" becomes a database guarantee rather than
@@ -48,14 +48,14 @@ an application convention.
 **Superseded:** an earlier three-layer design with a fuzzy "Did you mean?" confirmation at a
 0.72 similarity threshold. That screen is drawn but unrouted.
 **Known cost, accepted:** this is deliberately the *under-merging* side of the tradeoff.
-`candy apple` and `candy apples` are separate Topics forever; so are `Jury duty` and
-`Jury duty.` The whole cost lands on **median Kreamis per Topic** — see Q3 below.
-**Full design:** [05 — Topic Matching](05-topic-matching.md).
+`candy apple` and `candy apples` are separate Experiences forever; so are `Jury duty` and
+`Jury duty.` The whole cost lands on **median Kreamis per Experience** — see Q3 below.
+**Full design:** [05 — Experience Matching](05-experience-matching.md).
 
 ---
 
 ### D5 — Short shared title + rating + optional note
-**Chosen:** Topic titles capped at 80 characters; personal notes capped at 150.
+**Chosen:** Experience titles capped at 80 characters; personal notes capped at 150.
 **Why:** the title is a *shared label* others must be able to find and join, so it has to
 stay short and generic. The note is where personality goes.
 **Note:** this differs slightly from the original 150-char single-field idea — splitting them
@@ -92,7 +92,7 @@ nonsense, and building a ranking system that produces nonsense is worse than not
 
 ---
 
-### D10 — One Kreami per user per Topic, editable forever
+### D10 — One Kreami per user per Experience, editable forever
 **Why:** prevents ballot-stuffing and keeps averages meaningful.
 **Known cost:** you can't record rating the same experience twice at different times
 (the Letterboxd "rewatch" case). Accepted — the average matters more than the diary.
@@ -100,7 +100,7 @@ nonsense, and building a ranking system that produces nonsense is worse than not
 ---
 
 ### D11 — Averages hidden below 3 Kreamis
-**Why:** "5.0 Kreams" from a single rating is a false signal, and it makes every new Topic
+**Why:** "5.0 Kreams" from a single rating is a false signal, and it makes every new Experience
 look artificially good.
 
 ---
@@ -115,7 +115,7 @@ and unlimited free bandwidth.
 ### D13 — No categories or tags in v1
 **Why:** categorizing "literally anything" is an unbounded taxonomy problem, and a category
 picker adds friction to the ten-second post. Search and recency handle discovery.
-**Revisit if:** search proves insufficient and users can't find topics they know exist.
+**Revisit if:** search proves insufficient and users can't find experiences they know exist.
 
 ---
 
@@ -171,6 +171,36 @@ should not. Without column grants, any signed-in user could `PATCH` their own
 entirely. Counters are trigger-maintained and handles go through `claim_handle()`, so
 neither should be client-writable at all.
 
+---
+
+### D17 — "Experience", not "Topic"
+**Chosen (2026-08-25):** the shared thing a Kreami attaches to is an **Experience**
+everywhere — UI, schema, functions, routes (`/e/:slug`) and docs.
+
+**Why:** the product was always about experiences —
+[01 — Product Vision](01-product-vision.md) opens with "a social rating app for experiences"
+and the compose field already asked "What did you experience?" — while the schema said
+"topic". [02 — Domain Model](02-domain-model.md) calls the vocabulary load-bearing, and this
+was the one place it had drifted.
+
+"Topic" is forum vocabulary: topics are things you *discuss*, experiences are things you
+*have*. It also said nothing about what makes Kreami different. Letterboxd has films, Beli
+has restaurants, Kreami has experiences.
+
+**An unplanned benefit:** "experience" quietly pressures people toward verb phrases — "eating
+a candy apple" rather than "candy apple". Verb-phrased titles are more specific and collide
+less, so they dedupe *better* under the exact-match rule. The word does some of the work the
+matching pipeline would otherwise have to.
+
+**Known cost:** not everything rated is strictly an experience — "candy apple lip gloss" is a
+product, "the first cold day of fall" is a phenomenon. "Experience" stretches to cover them
+(you experience them) but not perfectly. "Topic" covered them no better and cost the
+differentiator.
+
+**Timing:** done at the cheapest possible moment — zero experiences existed, no URLs had been
+shared, and the client did not reference the tables yet. After launch this would touch shared
+links and muscle memory.
+
 ## Open questions
 
 Things genuinely unresolved. Each needs an answer eventually; none blocks Phase 0.
@@ -188,20 +218,20 @@ in one flat color, and survive being screenshotted out of context. This is a rea
 not a placeholder-icon task, and it gates the visual work in Phase 2.
 
 ### Q3 — Does the exact-match rule fragment the corpus? ⚠️
-The open question that matters most. Under D4, every phrasing difference is a separate Topic,
+The open question that matters most. Under D4, every phrasing difference is a separate Experience,
 and nothing repairs that except manual merging.
 
-**The measurement:** median Kreamis per Topic among Topics older than 7 days, plus the share
-of resolutions logging `new` that are near-misses of an existing Topic.
+**The measurement:** median Kreamis per Experience among Experiences older than 7 days, plus the share
+of resolutions logging `new` that are near-misses of an existing Experience.
 
-**The remedies, in order of cost:** strip punctuation in `normalize_topic_title`; then merge
+**The remedies, in order of cost:** strip punctuation in `normalize_experience_title`; then merge
 aggressively from the nightly duplicate report (each merge writes an alias, so the fix
 compounds); then reinstate the fuzzy confirmation step, which is already designed and drawn.
 
-**Do not skip `topic_resolution_log` in Phase 2** — without it this question cannot be
+**Do not skip `experience_resolution_log` in Phase 2** — without it this question cannot be
 answered and the decision cannot be revisited on evidence.
 
-### Q4 — What happens to a Topic when everyone deletes their Kreami?
+### Q4 — What happens to a Experience when everyone deletes their Kreami?
 Currently it lingers with `kreami_count = 0`, hidden from discovery but reachable by URL.
 Probably fine. Alternative: soft-delete after 30 days at zero.
 
@@ -214,7 +244,7 @@ open. Auto-merging is dangerous — it's user-triggered destructive action on sh
 Currently intended to be gated by an RPC with a cooldown, to prevent impersonation via handle
 recycling. Cooldown length (30 days?) and reservation period (90 days?) are guesses.
 
-### Q7 — How do you seed the first hundred Topics?
+### Q7 — How do you seed the first hundred Experiences?
 Phase 5 says "write 50–100 yourself," which is correct but unspecified. Which experiences?
 The ideal seed is *maximally universal and mildly contentious* — things everyone has done and
 disagrees about. That list is worth writing deliberately rather than improvising.

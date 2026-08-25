@@ -18,10 +18,10 @@ Read them in order the first time. After that, jump straight to the one you're d
 | # | Doc | What it answers |
 |---|-----|-----------------|
 | 01 | [Product Vision](docs/01-product-vision.md) | What Kreami is, who it's for, what it deliberately is not |
-| 02 | [Domain Model](docs/02-domain-model.md) | The nouns and verbs — Kreami, Topic, Kream, Follow — and their rules |
+| 02 | [Domain Model](docs/02-domain-model.md) | The nouns and verbs — Kreami, Experience, Kream, Follow — and their rules |
 | 03 | [Architecture](docs/03-architecture.md) | Stack, hosting, the $0 budget, and the scaling escape hatches |
 | 04 | [Data Model](docs/04-data-model.md) | Postgres schema, indexes, triggers, RLS policies |
-| 05 | [Topic Matching](docs/05-topic-matching.md) | The hard problem: free-form text → shared threads |
+| 05 | [Experience Matching](docs/05-experience-matching.md) | The hard problem: free-form text → shared threads |
 | 06 | [Feeds & Social Graph](docs/06-feeds-and-social.md) | Follows, the home feed, discovery, ranking |
 | 07 | [API Surface](docs/07-api-surface.md) | Every call the client makes, and its contract |
 | 08 | [UX Flows](docs/08-ux-flows.md) | Screens, navigation, and the critical posting flow |
@@ -38,9 +38,9 @@ An **Expo/React Native universal app** (iOS, Android, and a web export from one 
 talking directly to **Supabase** (Postgres + Auth + Storage) with Row Level Security as the
 authorization layer and Postgres functions as the API. No custom backend server exists in v1.
 Users sign in with a **Google account or an email magic link**. They type an experience in
-free-form text; a live search steers them toward an existing Topic, and on submit an
-**exact match ignoring case** joins that thread while anything else becomes a new Topic.
-They pick **0–5 whole Kreams** and optionally add a ~150-character note. Their Kreami appears on the Topic's thread
+free-form text; a live search steers them toward an existing Experience, and on submit an
+**exact match ignoring case** joins that thread while anything else becomes a new Experience.
+They pick **0–5 whole Kreams** and optionally add a ~150-character note. Their Kreami appears on the Experience's thread
 and in the feeds of everyone who follows them. Everything is public. Total infrastructure cost
 at launch: **$0**.
 
@@ -52,9 +52,9 @@ These came from the design interview and are settled unless deliberately revisit
 - **Platform:** Expo universal — one codebase for mobile and web.
 - **Backend:** Supabase free tier. Postgres, Auth, Storage.
 - **Auth:** Google OAuth + email magic link. No passwords.
-- **Topics:** users type anything. An exact match ignoring case joins that thread; anything
-  else is a new topic. No confirmation step, no fuzzy guessing.
-- **Kreami shape:** short shared Topic title + rating + optional personal note.
+- **Experiences:** users type anything. An exact match ignoring case joins that thread; anything
+  else is a new experience. No confirmation step, no fuzzy guessing.
+- **Kreami shape:** short shared Experience title + rating + optional personal note.
 - **v1 features:** follows, following feed, likes, replies, search, global discovery feed.
 - **Ranking:** absolute ratings only. Beli-style pairwise comparison is designed for, not built.
 - **Notifications:** in-app activity tab only. No push, no email.
@@ -64,5 +64,5 @@ These came from the design interview and are settled unless deliberately revisit
 ## Deliberately deferred
 
 Photos · push notifications · private accounts · pairwise comparison ranking ·
-semantic (embedding-based) topic clustering · native app store releases · direct messages ·
+semantic (embedding-based) experience clustering · native app store releases · direct messages ·
 any form of monetization.

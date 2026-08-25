@@ -46,7 +46,7 @@ flowchart TB
 
 The client holds a Supabase anon key and talks to Postgres directly over PostgREST.
 **Row Level Security is the authorization layer** — not middleware, not a service.
-Anything that needs logic beyond a policy (topic matching, feed assembly, counters) is a
+Anything that needs logic beyond a policy (experience matching, feed assembly, counters) is a
 `SECURITY DEFINER` Postgres function the client calls by name.
 
 This is the cheapest architecture that is not a toy. It's also the one with the sharpest
@@ -92,13 +92,13 @@ and it should be a known cost rather than a surprise:
   `web.output: "static"` makes Expo Router render each *static* route to real HTML during
   the build — verified in Phase 0: the exported `index.html` contains the actual copy, not
   an empty root div. So the landing page and other fixed routes are genuinely indexable.
-  **Dynamic routes are the problem**: `/t/[slug]` and `/u/[handle]` point at user-generated
+  **Dynamic routes are the problem**: `/e/[slug]` and `/u/[handle]` point at user-generated
   content that does not exist at build time, so they ship as client-rendered shells. Those
   are exactly the URLs people share, and they are the ones that render a blank preview card
   in iMessage, Discord, or Slack.
 - **Bundle size** is heavier than a purpose-built web app. React Native Web carries weight.
 - **The mitigation, when it matters:** a tiny Cloudflare Worker that intercepts requests to
-  `/t/:slug` and `/u/:handle` from crawler user-agents and returns a minimal HTML document
+  `/e/:slug` and `/u/:handle` from crawler user-agents and returns a minimal HTML document
   with proper OpenGraph tags — title, average Kreams, count — while serving the SPA to
   everyone else. That's roughly 60 lines and runs free. It's **Phase 5**, not Phase 1, but
   it's the difference between a shared link being a link and being an advertisement.
@@ -150,13 +150,13 @@ kreami/
 │   │   │   ├── post.tsx    # The compose flow
 │   │   │   ├── activity.tsx    # Notifications
 │   │   │   └── profile.tsx # Your profile
-│   │   ├── t/[slug].tsx    # Topic thread
+│   │   ├── e/[slug].tsx    # Experience thread
 │   │   ├── u/[handle].tsx  # A user's profile
 │   │   └── k/[id].tsx      # A single Kreami permalink
 │   ├── components/
 │   │   ├── KreamRating.tsx # THE component. Display + input for 0-5 Kreams.
 │   │   ├── KreamiCard.tsx
-│   │   └── TopicHeader.tsx
+│   │   └── ExperienceHeader.tsx
 │   ├── lib/
 │   │   ├── supabase.ts     # Client + typed helpers
 │   │   ├── query-client.ts # Shared TanStack Query defaults
@@ -185,7 +185,7 @@ Nothing here needs to be built now. It needs to be *possible* now, and it is:
    table populated by a trigger. The client query barely changes. See
    [06 — Feeds & Social Graph](06-feeds-and-social.md).
 2. **Egress gets expensive.** Put Cloudflare in front of the read-only RPCs and cache
-   Topic pages for 60 seconds. Topic averages are not real-time-critical.
+   Experience pages for 60 seconds. Experience averages are not real-time-critical.
 3. **You need real server logic** (recommendations, moderation ML, payments). Add Supabase
    Edge Functions — Deno, same project, no new vendor. Only then consider a real backend.
 4. **You outgrow Supabase entirely.** The data is plain Postgres; `pg_dump` moves it to Neon,
