@@ -139,6 +139,39 @@ export type Database = {
           },
         ]
       }
+      follows: {
+        Row: {
+          created_at: string
+          followee_id: string
+          follower_id: string
+        }
+        Insert: {
+          created_at?: string
+          followee_id: string
+          follower_id: string
+        }
+        Update: {
+          created_at?: string
+          followee_id?: string
+          follower_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follows_followee_id_fkey"
+            columns: ["followee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kreamis: {
         Row: {
           created_at: string
@@ -186,6 +219,39 @@ export type Database = {
           },
           {
             foreignKeyName: "kreamis_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      likes: {
+        Row: {
+          created_at: string
+          kreami_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          kreami_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          kreami_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "likes_kreami_id_fkey"
+            columns: ["kreami_id"]
+            isOneToOne: false
+            referencedRelation: "kreamis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "likes_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -264,6 +330,48 @@ export type Database = {
           },
         ]
       }
+      replies: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_hidden: boolean
+          kreami_id: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_hidden?: boolean
+          kreami_id: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_hidden?: boolean
+          kreami_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "replies_kreami_id_fkey"
+            columns: ["kreami_id"]
+            isOneToOne: false
+            referencedRelation: "kreamis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "replies_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reserved_handles: {
         Row: {
           created_at: string
@@ -290,6 +398,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      active_experiences: {
+        Args: { lim?: number }
+        Returns: {
+          avg_kreams: number
+          id: string
+          kreami_count: number
+          recent_count: number
+          slug: string
+          title: string
+        }[]
+      }
       assert_rate_limit: {
         Args: { action: string; max_count: number; window_size: string }
         Returns: undefined
@@ -345,7 +464,49 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      global_feed: {
+        Args: { before?: string; lim?: number }
+        Returns: {
+          avatar_url: string
+          created_at: string
+          display_name: string
+          experience_avg: number
+          experience_id: string
+          experience_kreami_count: number
+          experience_slug: string
+          experience_title: string
+          handle: string
+          kreami_id: string
+          like_count: number
+          liked_by_me: boolean
+          note: string
+          rating: number
+          reply_count: number
+          user_id: string
+        }[]
+      }
       handle_available: { Args: { candidate: string }; Returns: boolean }
+      home_feed: {
+        Args: { before?: string; lim?: number }
+        Returns: {
+          avatar_url: string
+          created_at: string
+          display_name: string
+          experience_avg: number
+          experience_id: string
+          experience_kreami_count: number
+          experience_slug: string
+          experience_title: string
+          handle: string
+          kreami_id: string
+          like_count: number
+          liked_by_me: boolean
+          note: string
+          rating: number
+          reply_count: number
+          user_id: string
+        }[]
+      }
       keepalive: { Args: never; Returns: string }
       merge_experiences: {
         Args: { loser: string; winner: string }
@@ -361,6 +522,7 @@ export type Database = {
           was_edit: boolean
         }[]
       }
+      post_reply: { Args: { body: string; target: string }; Returns: string }
       recompute_experience_aggregates: {
         Args: { target: string }
         Returns: undefined
@@ -385,6 +547,20 @@ export type Database = {
         }[]
       }
       slugify: { Args: { raw: string }; Returns: string }
+      toggle_follow: {
+        Args: { target: string }
+        Returns: {
+          follower_count: number
+          following: boolean
+        }[]
+      }
+      toggle_like: {
+        Args: { target: string }
+        Returns: {
+          like_count: number
+          liked: boolean
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

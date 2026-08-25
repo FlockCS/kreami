@@ -104,6 +104,17 @@ boundary tests deliberately cannot provide.
 - [ ] **Counter triggers under concurrency.** `kreami_count` and `rating_sum` are
       trigger-maintained; drift only shows up under real load.
 
+## Unverified — Phase 3
+
+- [ ] **Follow, like and reply round trips.** The toggles are idempotent and rate-limited,
+      but nothing has followed, liked or replied to anything yet. *Trigger: the moment the
+      feed UI exists.*
+- [ ] **Follow counters.** `follower_count` / `following_count` are trigger-maintained and
+      have never moved.
+- [ ] **Home feed against a real follow graph.** Verified only that it refuses anonymous
+      callers; it has never returned somebody else's Kreami.
+- [ ] **Keyset pagination.** The `before` cursor has never been passed.
+
 ## Not built yet
 
 - [ ] **Admin surface.** No way to review reports, run merges, or read the duplicate-candidate

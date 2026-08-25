@@ -96,8 +96,9 @@ something slightly different, and land in the same thread.
 
 ## Phase 3 — Social (3–4 sessions)
 
-- [ ] `follows`, `likes`, `replies` with triggers and RLS
-- [ ] `home_feed()` and `global_feed()` with keyset pagination
+- [x] `follows`, `likes`, `replies` with triggers and RLS
+- [x] `home_feed()` and `global_feed()` with keyset pagination, plus
+      `active_experiences()`, `toggle_follow()`, `toggle_like()`, `post_reply()`
 - [ ] Feed card component, shared between both feeds
 - [ ] Infinite scroll, pull to refresh
 - [ ] Follow/unfollow with optimistic updates
