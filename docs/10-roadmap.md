@@ -99,12 +99,14 @@ something slightly different, and land in the same thread.
 - [x] `follows`, `likes`, `replies` with triggers and RLS
 - [x] `home_feed()` and `global_feed()` with keyset pagination, plus
       `active_experiences()`, `toggle_follow()`, `toggle_like()`, `post_reply()`
-- [ ] Feed card component, shared between both feeds
-- [ ] Infinite scroll, pull to refresh
-- [ ] Follow/unfollow with optimistic updates
-- [ ] Like and reply
-- [ ] Other users' profiles; follower/following lists
-- [ ] **Empty-feed backfill** — Discover inline when you follow nobody
+- [x] Feed card component, shared between both feeds
+- [x] Infinite scroll (keyset), pull to refresh
+- [x] Follow/unfollow, and likes with optimistic updates
+- [x] Other users' profiles, with `public_profile()` and `profile_kreamis()`
+- [x] **Empty-feed backfill** — the global feed inline when the following feed is thin
+- [x] Tab shell: Home, Discover, compose, You
+- [ ] Replies (schema and `post_reply()` exist; no UI yet)
+- [ ] Follower / following lists
 
 **Done when:** two accounts can follow each other and see each other's Kreamis in Home.
 

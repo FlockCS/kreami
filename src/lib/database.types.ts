@@ -523,6 +523,38 @@ export type Database = {
         }[]
       }
       post_reply: { Args: { body: string; target: string }; Returns: string }
+      profile_kreamis: {
+        Args: { lim?: number; sort?: string; target: string }
+        Returns: {
+          created_at: string
+          experience_avg: number
+          experience_id: string
+          experience_kreami_count: number
+          experience_slug: string
+          experience_title: string
+          kreami_id: string
+          like_count: number
+          note: string
+          rating: number
+          reply_count: number
+        }[]
+      }
+      public_profile: {
+        Args: { target_handle: string }
+        Returns: {
+          avatar_url: string
+          avg_kream_given: number
+          bio: string
+          display_name: string
+          follower_count: number
+          following_count: number
+          handle: string
+          id: string
+          is_following: boolean
+          is_self: boolean
+          kreami_count: number
+        }[]
+      }
       recompute_experience_aggregates: {
         Args: { target: string }
         Returns: undefined
