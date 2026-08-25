@@ -1,26 +1,40 @@
 # macOS
 .DS_Store
+*.pem
 
-# Node
+# Dependencies
 node_modules/
-npm-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
 
-# Expo / React Native
+# Expo
 .expo/
 dist/
 web-build/
+expo-env.d.ts
+.metro-health-check*
+
+# Native build output (managed workflow regenerates these)
+/ios
+/android
+.kotlin/
+*.orig.*
 *.jks
 *.p8
 *.p12
 *.key
 *.mobileprovision
-*.orig.*
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
 
 # Environment & secrets
 .env
-.env.*
+.env.local
+.env.*.local
 !.env.example
 
 # Supabase CLI local state
@@ -28,7 +42,6 @@ supabase/.branches/
 supabase/.temp/
 
 # Editors
-.vscode/
 .idea/
 
 # Generated design canvases (~2 MB each of packaged editor code).

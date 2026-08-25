@@ -88,9 +88,14 @@ broken" three weeks after launch.
 You chose one codebase, which is the right call for a solo builder — but it has a real cost,
 and it should be a known cost rather than a surprise:
 
-- **The web export is a client-rendered SPA.** No server rendering. Search engines will
-  index it poorly, and a Kreami link pasted into iMessage, Discord, or Twitter renders a
-  generic card with no title, no rating, no preview.
+- **The web export prerenders, but only what it can enumerate at build time.**
+  `web.output: "static"` makes Expo Router render each *static* route to real HTML during
+  the build — verified in Phase 0: the exported `index.html` contains the actual copy, not
+  an empty root div. So the landing page and other fixed routes are genuinely indexable.
+  **Dynamic routes are the problem**: `/t/[slug]` and `/u/[handle]` point at user-generated
+  content that does not exist at build time, so they ship as client-rendered shells. Those
+  are exactly the URLs people share, and they are the ones that render a blank preview card
+  in iMessage, Discord, or Slack.
 - **Bundle size** is heavier than a purpose-built web app. React Native Web carries weight.
 - **The mitigation, when it matters:** a tiny Cloudflare Worker that intercepts requests to
   `/t/:slug` and `/u/:handle` from crawler user-agents and returns a minimal HTML document
@@ -137,32 +142,40 @@ that exists only in a web UI is a schema you will lose.
 
 ```
 kreami/
-├── app/                    # Expo Router routes (these are also the web URLs)
-│   ├── (tabs)/
-│   │   ├── index.tsx       # Home feed
-│   │   ├── discover.tsx    # Search + global feed
-│   │   ├── post.tsx        # The compose flow
-│   │   ├── activity.tsx    # Notifications
-│   │   └── profile.tsx     # Your profile
-│   ├── t/[slug].tsx        # Topic thread
-│   ├── u/[handle].tsx      # A user's profile
-│   └── k/[id].tsx          # A single Kreami permalink
-├── components/
-│   ├── KreamRating.tsx     # THE component. Display + input for 0-5 Kreams.
-│   ├── KreamiCard.tsx
-│   └── TopicHeader.tsx
-├── lib/
-│   ├── supabase.ts         # Client + typed helpers
-│   ├── queries/            # One file per feature, all TanStack Query hooks
-│   └── database.types.ts   # Generated. Never hand-edited.
+├── src/
+│   ├── app/                # Expo Router routes (these are also the web URLs)
+│   │   ├── (tabs)/
+│   │   │   ├── index.tsx   # Home feed
+│   │   │   ├── discover.tsx    # Search + global feed
+│   │   │   ├── post.tsx    # The compose flow
+│   │   │   ├── activity.tsx    # Notifications
+│   │   │   └── profile.tsx # Your profile
+│   │   ├── t/[slug].tsx    # Topic thread
+│   │   ├── u/[handle].tsx  # A user's profile
+│   │   └── k/[id].tsx      # A single Kreami permalink
+│   ├── components/
+│   │   ├── KreamRating.tsx # THE component. Display + input for 0-5 Kreams.
+│   │   ├── KreamiCard.tsx
+│   │   └── TopicHeader.tsx
+│   ├── lib/
+│   │   ├── supabase.ts     # Client + typed helpers
+│   │   ├── query-client.ts # Shared TanStack Query defaults
+│   │   ├── queries/        # One file per feature, all TanStack Query hooks
+│   │   └── database.types.ts   # Generated. Never hand-edited.
+│   ├── theme/tokens.ts     # Editorial palette + type, for non-Tailwind surfaces
+│   └── global.css          # Tailwind entrypoint consumed by NativeWind
 ├── supabase/
 │   ├── migrations/         # Ordered SQL. The source of truth for the schema.
 │   └── seed.sql            # Dev fixtures
 └── .github/workflows/
+    ├── ci.yml              # Typecheck, lint, format on every push and PR
     ├── deploy-web.yml
     ├── migrate.yml
     └── keepalive.yml       # The cron that keeps the free project awake
 ```
+
+**Source lives under `src/`** — that is the current `create-expo-app` convention and
+`@/*` resolves to `./src/*`. Routes are `src/app/**`, not `app/**`.
 
 ## Scaling escape hatches
 

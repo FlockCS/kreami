@@ -10,17 +10,31 @@ in a broken state.
 
 ---
 
-## Phase 0 — Foundation (2–3 sessions)
+## Phase 0 — Foundation (2–3 sessions) — *scaffold landed 2026-08-25*
 
 Nothing user-visible. Everything downstream depends on it.
 
-- [ ] Git repo, TypeScript strict, ESLint/Prettier
-- [ ] `npx create-expo-app` with Expo Router, NativeWind, TanStack Query
-- [ ] Two Supabase projects: `kreami-dev`, `kreami-prod`
-- [ ] Supabase CLI wired up; first migration applies from a file, not the dashboard
-- [ ] `supabase gen types` in a script; `database.types.ts` generated
-- [ ] GitHub Actions: migrate, deploy web to Cloudflare Pages, **keepalive cron**
-- [ ] Cloudflare Pages project connected (**not Vercel** — see [03](03-architecture.md))
+**In the repo:**
+
+- [x] Git repo, TypeScript strict, ESLint (flat config) + Prettier
+- [x] Expo SDK 57 / RN 0.86 app with Expo Router, NativeWind 4, TanStack Query 5
+- [x] Editorial design tokens wired into `tailwind.config.js` and `src/theme/tokens.ts`
+- [x] Supabase client with a chunked SecureStore session adapter (SecureStore caps values
+      at 2 KB; a session JWT exceeds it)
+- [x] Supabase CLI as a devDependency; `supabase/config.toml`; first migration written
+- [x] `db:types` / `db:types:local` scripts; `database.types.ts` placeholder in place
+- [x] GitHub Actions: `ci`, `migrate`, `deploy-web`, `keepalive`
+- [x] Verified: `typecheck`, `lint`, `format:check`, and `expo export --platform web` all
+      pass, and the export renders correctly in a browser
+
+**Needs an account, so it needs you** — full instructions in
+[12 — Environment Setup](12-environment-setup.md):
+
+- [ ] Create `kreami-dev` and `kreami-prod`; fill `.env.local`
+- [ ] `supabase db push` the first migration; regenerate types
+- [ ] Create the Cloudflare Pages project `kreami`
+- [ ] Add the nine GitHub secrets and the `production` environment
+- [ ] Watch all four workflows go green once
 
 **Done when:** a schema change on your laptop reaches prod through CI, and the web build
 deploys automatically.

@@ -28,6 +28,7 @@ Read them in order the first time. After that, jump straight to the one you're d
 | 09 | [Security & Moderation](docs/09-security-moderation.md) | Abuse, rate limits, the report queue, trust & safety |
 | 10 | [Roadmap](docs/10-roadmap.md) | Phased build plan, sized for solo nights-and-weekends |
 | 11 | [Decisions & Open Questions](docs/11-decisions-and-open-questions.md) | The decision log and what's still unresolved |
+| 12 | [Environment Setup](docs/12-environment-setup.md) | Running it locally, and the accounts/secrets only you can create |
 
 ---
 

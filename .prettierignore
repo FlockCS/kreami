@@ -1,0 +1,9 @@
+node_modules/
+.expo/
+dist/
+web-build/
+design/
+supabase/.branches/
+supabase/.temp/
+src/lib/database.types.ts
+*.md

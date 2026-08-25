@@ -1,0 +1,41 @@
+name: Supabase keepalive
+
+# Supabase pauses free projects after ~7 days without activity, and a paused
+# project is a dead app. This runs every three days to keep both alive.
+#
+# Note: GitHub disables scheduled workflows in a repository with no commit
+# activity for 60 days. If the project goes quiet for that long, re-enable this
+# from the Actions tab.
+
+on:
+  schedule:
+    - cron: '17 6 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping projects
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping production
+        env:
+          URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          code=$(curl -sS -o /dev/null -w '%{http_code}' \
+            -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
+            "$URL/rest/v1/")
+          echo "production responded $code"
+          [ "$code" -lt 400 ] || exit 1
+
+      - name: Ping development
+        env:
+          URL: ${{ secrets.DEV_SUPABASE_URL }}
+          KEY: ${{ secrets.DEV_SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$URL" ]; then echo "dev project not configured; skipping"; exit 0; fi
+          code=$(curl -sS -o /dev/null -w '%{http_code}' \
+            -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
+            "$URL/rest/v1/")
+          echo "development responded $code"
+          [ "$code" -lt 400 ] || exit 1
