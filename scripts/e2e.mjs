@@ -119,6 +119,24 @@ const experiences = new Set();
 
 async function cleanup() {
   for (const u of created) {
+    // Exactly what src/app/settings.tsx does, and in the same order: Storage
+    // does not cascade from auth.users and Postgres cannot reach it, so the
+    // files have to go first, while the session can still authorise it.
+    const listed = await fetch(URL_BASE + '/storage/v1/object/list/avatars', {
+      method: 'POST',
+      headers: headers(u.token),
+      body: JSON.stringify({ prefix: u.id + '/', limit: 100 }),
+    });
+    const files = await listed.json().catch(() => []);
+    for (const f of Array.isArray(files) ? files : []) {
+      // No Content-Type here. headers() sets application/json, and Storage
+      // rejects a JSON content-type with an empty body — a 400 that looks
+      // exactly like a permissions failure and is not one.
+      await fetch(URL_BASE + `/storage/v1/object/avatars/${u.id}/${f.name}`, {
+        method: 'DELETE',
+        headers: { apikey: ANON, Authorization: 'Bearer ' + u.token },
+      });
+    }
     await rpc(u.token, 'delete_account', {});
   }
   if (!SERVICE) {
@@ -370,6 +388,12 @@ try {
   });
   check('you can delete your own, which is how changing a photo works', r.status < 400);
 
+  // Left in place deliberately: cleanup below deletes bob's account, and the
+  // check after it proves the file went with him. A public bucket keeping the
+  // face of somebody who asked to be forgotten is the failure being guarded.
+  r = await putAvatar(bob.token, `${bob.id}/leaving.png`);
+  check('bob has a photo to leave behind', r.status < 400, 'HTTP ' + r.status);
+
   console.log('\nWhat a signed-in user must NOT be able to do\n');
   r = await rpc(bob.token, 'create_experience', { raw_title: 'sneaking one in' });
   check('cannot call create_experience directly', r.status >= 400, JSON.stringify(r.body));
@@ -410,8 +434,26 @@ try {
   );
 } finally {
   console.log('\nCleaning up\n');
+  const bobId = created[1]?.id;
   await cleanup();
   console.log('  deleted ' + created.length + ' test accounts and everything they created');
+
+  if (bobId) {
+    // The account is gone; the file must be too. This is the check that caught
+    // an attempt to do this cleanup in delete_account(), which Postgres will
+    // not allow and which broke account deletion entirely.
+    // Storage answers a missing public object with HTTP 400 wrapping a 404
+    // body, so "not 200" is the honest assertion here.
+    const gone = await fetch(URL_BASE + `/storage/v1/object/public/avatars/${bobId}/leaving.png`);
+    check('leaving takes your photo with you', gone.status >= 400, 'HTTP ' + gone.status);
+
+    const stillThere = await rest(null, `profiles?select=handle&id=eq.${bobId}`);
+    check(
+      'and the account really was deleted',
+      Array.isArray(stillThere.body) && stillThere.body.length === 0,
+      JSON.stringify(stillThere.body),
+    );
+  }
 }
 
 console.log('\n' + (failures ? failures + ' CHECK(S) FAILED' : 'all end-to-end checks passed'));

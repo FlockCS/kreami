@@ -4,7 +4,9 @@ import { Alert, Platform, Pressable, ScrollView, Text, View } from 'react-native
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { signOut, useProfile, useSession } from '@/lib/auth';
+import { removeOthers } from '@/lib/avatars';
 import { supabase } from '@/lib/supabase';
+import { useGoBack } from '@/lib/navigation';
 import { colors } from '@/theme/tokens';
 
 /**
@@ -14,12 +16,20 @@ import { colors } from '@/theme/tokens';
  */
 export default function Settings() {
   const router = useRouter();
+  const goBack = useGoBack('/me');
   const { session } = useSession();
   const profile = useProfile();
 
   const leave = useMutation({ mutationFn: signOut });
   const remove = useMutation({
     mutationFn: async () => {
+      // The photo first, while there is still a session authorised to delete
+      // it. Storage does not cascade from auth.users — nothing in Postgres can
+      // reach it, because Supabase blocks direct SQL deletes from the storage
+      // tables — so this call is the only thing standing between deleting your
+      // account and leaving your face in a public bucket.
+      if (session?.user.id) await removeOthers(session.user.id, null);
+
       const { error } = await supabase.rpc('delete_account');
       if (error) throw new Error(error.message);
       await supabase.auth.signOut();
@@ -42,11 +52,7 @@ export default function Settings() {
   return (
     <SafeAreaView className="flex-1 bg-paper" style={{ backgroundColor: colors.paper }}>
       <View className="flex-row items-center gap-4 px-6 pb-2 pt-5">
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.back()}
-          className="min-h-11 justify-center"
-        >
+        <Pressable accessibilityRole="button" onPress={goBack} className="min-h-11 justify-center">
           <Text className="font-sans text-[15px] text-ink">Back</Text>
         </Pressable>
         <Text className="font-serif text-[26px] leading-none text-ink">Settings</Text>

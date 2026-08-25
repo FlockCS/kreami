@@ -60,12 +60,14 @@ somebody else signs up.
 
 ## Correctness and hygiene
 
-- [ ] **Edit profile loads blank on a cold open.** `useState(profile.data?.display_name ?? '')`
-      initialises before the profile query resolves, so opening `/edit-profile` directly —
-      a refresh on web, or a deep link — leaves the name field empty and Save disabled
-      until you navigate away and back. Invisible when arriving from Settings, because the
-      profile is already cached. Pre-existing; spotted while building the photo field.
-      *Trigger: the first person who refreshes that page.*
+- [ ] **Orphaned avatar files.** Deleting your account deletes your photo, but only because
+      the client sweeps Storage immediately before calling `delete_account()`. Postgres
+      cannot do it — Supabase's `storage.protect_delete()` trigger rejects direct SQL
+      deletes from the storage tables — so a client that dies between the two calls leaves
+      one ~5 KB file with no owner. Same for a failed upload. The fix is a sweeper that
+      lists the bucket and drops folders with no matching profile; it needs somewhere to
+      run, which this project does not have yet. *Trigger: an Edge Function or scheduled
+      job exists for any other reason, or the bucket stops being nearly empty.*
 - [ ] **Avatar upload is only exercised on web.** The picker was driven through the DOM in
       the browser; `allowsEditing`, the iOS/Android crop UI, and the photo-library
       permission prompt have never run on a device. *Trigger: first native build.*

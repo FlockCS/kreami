@@ -15,6 +15,7 @@ import {
   type KreamiWithAuthor,
   type ThreadSort,
 } from '@/lib/experiences';
+import { useGoBack } from '@/lib/navigation';
 import { colors } from '@/theme/tokens';
 
 const SORTS: { key: ThreadSort; label: string }[] = [
@@ -26,6 +27,7 @@ const SORTS: { key: ThreadSort; label: string }[] = [
 
 export default function ExperienceThread() {
   const router = useRouter();
+  const goBack = useGoBack('/');
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const [sort, setSort] = useState<ThreadSort>('recent');
 
@@ -64,7 +66,7 @@ export default function ExperienceThread() {
     <SafeAreaView className="flex-1 bg-paper" style={{ backgroundColor: colors.paper }}>
       <ScrollView contentContainerClassName="pb-12">
         <View className="flex-row items-center justify-between px-6 pb-2 pt-5">
-          <Pressable accessibilityRole="button" onPress={() => router.back()} className="py-2">
+          <Pressable accessibilityRole="button" onPress={goBack} className="py-2">
             <Text className="font-sans text-[15px] text-ink">Back</Text>
           </Pressable>
         </View>

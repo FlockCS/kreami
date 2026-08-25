@@ -12,6 +12,7 @@ import {
   type FollowListKind,
   type FollowRow,
 } from '@/lib/profiles';
+import { useGoBack } from '@/lib/navigation';
 import { colors } from '@/theme/tokens';
 
 const TABS: { key: FollowListKind; label: string }[] = [
@@ -30,6 +31,8 @@ const TABS: { key: FollowListKind; label: string }[] = [
 export default function Follows() {
   const router = useRouter();
   const { handle, tab } = useLocalSearchParams<{ handle: string; tab?: string }>();
+  // Arrived cold from a link, the place to land is the profile this list belongs to.
+  const goBack = useGoBack({ pathname: '/u/[handle]', params: { handle } });
   const [kind, setKind] = useState<FollowListKind>(tab === 'following' ? 'following' : 'followers');
 
   // The param seeds the tab; switching writes it back, so on web a reload or a
@@ -46,11 +49,7 @@ export default function Follows() {
   return (
     <SafeAreaView className="flex-1 bg-paper" style={{ backgroundColor: colors.paper }}>
       <View className="flex-row items-center justify-between gap-4 px-6 pb-3 pt-5">
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.back()}
-          className="min-h-11 justify-center"
-        >
+        <Pressable accessibilityRole="button" onPress={goBack} className="min-h-11 justify-center">
           <Text className="font-sans text-[15px] text-ink">Back</Text>
         </Pressable>
         <Text className="font-sans text-[10px] tracking-label text-muted" numberOfLines={1}>

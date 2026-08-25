@@ -5,10 +5,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/button';
 import { ProfileView } from '@/components/profile-view';
 import { usePublicProfile } from '@/lib/profiles';
+import { useGoBack } from '@/lib/navigation';
 import { colors } from '@/theme/tokens';
 
 export default function PublicProfileScreen() {
   const router = useRouter();
+  const goBack = useGoBack('/');
   const { handle } = useLocalSearchParams<{ handle: string }>();
   const profile = usePublicProfile(handle);
 
@@ -18,11 +20,7 @@ export default function PublicProfileScreen() {
   return (
     <SafeAreaView className="flex-1 bg-paper" style={{ backgroundColor: colors.paper }}>
       <View className="flex-row items-center px-6 pb-3 pt-5">
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.back()}
-          className="min-h-11 justify-center"
-        >
+        <Pressable accessibilityRole="button" onPress={goBack} className="min-h-11 justify-center">
           <Text className="font-sans text-[15px] text-ink">Back</Text>
         </Pressable>
       </View>

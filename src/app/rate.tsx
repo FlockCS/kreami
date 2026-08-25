@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/button';
 import { KreamPicker, KreamRating } from '@/components/kream-rating';
 import { averageOf, MAX_NOTE_LENGTH, useExactExperience, usePostKreami } from '@/lib/experiences';
+import { useGoBack } from '@/lib/navigation';
 import { colors } from '@/theme/tokens';
 
 /**
@@ -17,6 +18,7 @@ import { colors } from '@/theme/tokens';
  */
 export default function Rate() {
   const router = useRouter();
+  const goBack = useGoBack('/');
   const params = useLocalSearchParams<{ title?: string }>();
   const title = (params.title ?? '').toString();
 
@@ -44,7 +46,7 @@ export default function Rate() {
   return (
     <SafeAreaView className="flex-1 bg-paper" style={{ backgroundColor: colors.paper }}>
       <View className="flex-row items-center justify-between px-6 pb-3 pt-5">
-        <Pressable accessibilityRole="button" onPress={() => router.back()} className="py-2">
+        <Pressable accessibilityRole="button" onPress={goBack} className="py-2">
           <Text className="font-sans text-[15px] text-ink">Back</Text>
         </Pressable>
         <Text className="font-sans text-[10px] tracking-label text-muted">2 OF 2</Text>

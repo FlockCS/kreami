@@ -39,19 +39,45 @@ export async function pickAvatar(): Promise<string | null> {
   // no-op; web has no editing step at all, so this is the only thing standing
   // between a landscape photo and a distorted avatar.
   const side = Math.min(asset.width, asset.height);
-  const context = ImageManipulator.manipulate(asset.uri);
-  context.crop({
-    originX: Math.round((asset.width - side) / 2),
-    originY: Math.round((asset.height - side) / 2),
-    width: side,
-    height: side,
-  });
-  context.resize({ width: SIZE, height: SIZE });
 
-  const rendered = await context.renderAsync();
-  const image = await rendered.saveAsync({ format: SaveFormat.JPEG, compress: 0.8 });
+  try {
+    const context = ImageManipulator.manipulate(asset.uri);
+    context.crop({
+      originX: Math.round((asset.width - side) / 2),
+      originY: Math.round((asset.height - side) / 2),
+      width: side,
+      height: side,
+    });
+    context.resize({ width: SIZE, height: SIZE });
 
-  return image.uri;
+    const rendered = await context.renderAsync();
+    const image = await rendered.saveAsync({ format: SaveFormat.JPEG, compress: 0.8 });
+    return image.uri;
+  } catch (cause) {
+    throw new Error(unreadable(asset.fileName ?? asset.mimeType ?? ''), { cause });
+  }
+}
+
+/**
+ * Why an image would not decode, in words somebody can act on.
+ *
+ * This exists because of how the failure arrives. On web, expo-image-manipulator
+ * rejects with a bare `<canvas>` element rather than an Error, so anything
+ * reading `.message` gets undefined and the whole thing fails in silence.
+ *
+ * HEIC is the case that actually happens: it is the iPhone default, the file
+ * picker offers it because `accept` is `image/*`, and no browser except Safari
+ * can decode it. The photo looks fine to the person choosing it.
+ */
+function unreadable(nameOrType: string): string {
+  if (/heic|heif/i.test(nameOrType)) {
+    return (
+      'This browser cannot read HEIC photos, which is the format iPhones use by default. ' +
+      'Pick a JPEG or PNG, or set Settings → Camera → Formats → Most Compatible on your ' +
+      'phone and take a new one.'
+    );
+  }
+  return 'That image could not be opened. Try a different photo, or a JPEG or PNG.';
 }
 
 /**
@@ -83,8 +109,15 @@ async function upload(userId: string, uri: string) {
  * Deliberately derived from the bucket rather than tracked in a column: a
  * failure between upload and profile write would otherwise orphan a file
  * forever, and listing one user's folder is a single cheap call.
+ *
+ * Exported because deleting an account has to do the same sweep with nothing
+ * kept — and it has to happen here, in a client holding the user's own
+ * credentials. Postgres cannot do it: Supabase's storage.protect_delete()
+ * trigger rejects direct SQL deletes from the storage tables outright, so a
+ * `delete from storage.objects` inside delete_account() does not clean up, it
+ * aborts the deletion. See the migration for the full account.
  */
-async function removeOthers(userId: string, keep: string | null) {
+export async function removeOthers(userId: string, keep: string | null) {
   const { data, error } = await supabase.storage.from(BUCKET).list(userId);
   if (error || !data) return;
 
