@@ -52,6 +52,8 @@ deploys automatically.
 - [x] Trigger creating a profile row on `auth.users` insert
 - [x] `handle_available()`, `claim_handle()` (30-day cooldown, 90-day reservation),
       `delete_account()` — all verified unreachable without a session
+- [x] Session provider with restore-before-route, and the redirect guard
+- [x] Sign-in screen, handle picker with live availability, sign out, delete account
 - [ ] Google OAuth on web and native
 - [ ] Magic link with **Resend SMTP configured** — not the built-in sender
 - [ ] Deep link handling; **tested on a physical phone**

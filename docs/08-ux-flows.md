@@ -208,6 +208,15 @@ metric. Make that the last screen's primary action.
 The search empty state is a **conversion opportunity, not an apology**. "Be first" is the
 right emotional frame for a rating app.
 
+## Implementation notes
+
+**Never pass Pressable's function `style` alongside `className`.** NativeWind takes over the
+`style` prop when a `className` is present, so `style={({ pressed }) => …}` is silently
+dropped. A filled button written that way renders transparent — and because its label is
+paper-coloured, it becomes an invisible hole in the layout. This shipped once and was caught
+only by looking at the screen. Pressed state goes in the `active:` variant, and every button
+goes through `src/components/button.tsx`.
+
 ## Accessibility
 
 - The Kream control needs real `accessibilityLabel`s: *"Rate 4 out of 5 Kreams."*
