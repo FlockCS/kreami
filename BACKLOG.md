@@ -78,13 +78,25 @@ somebody else signs up.
 Built but never exercised. Each needs an authenticated session or real data, which the
 boundary tests deliberately cannot provide.
 
-- [ ] **The matching pipeline end to end.** `post_kreami` joining an existing experience on
-      exact match, creating one otherwise, the one-per-user constraint turning a second post
-      into an edit, and the resolution log recording all three outcomes. *Trigger: the moment
-      the compose UI exists — this is the product, and none of it has run once.*
+- [x] ~~`post_kreami` creating an experience, and the one-per-user constraint turning a
+      second post into an edit.~~ Verified 2026-08-25 against live data: one experience, one
+      Kreami with `updated_at > created_at`, counters reconciling exactly with no drift.
+- [ ] **Exact-match joining.** Two spellings differing only in case must land on one
+      experience. Never exercised — only one experience exists.
+- [ ] **The punctuation split.** "Jury duty" and "Jury duty!" become separate experiences.
+      Known and accepted (D4), but nobody has seen it happen yet.
+- [ ] **Resolution-log outcomes.** `exact` / `alias` / `new` are being written but cannot be
+      read: the table is unreachable from the client by design, and there is no admin path.
+      This is the evidence Q3 turns on, so it needs a read path before the beta.
 - [ ] **Slug collision handling.** `create_experience` retries with a numbered suffix when two
       different titles slugify the same ("jury duty" and "jury duty!"). The retry loop has
       never executed.
+- [ ] **Slug length is unbounded.** An 80-character title produces an ~80-character slug —
+      the first real post gave
+      `chilling-at-the-airport-at-3-am-cause-the-airport-don-t-wake-up-until-5-30`. Works,
+      but the URLs are unwieldy to share and apostrophes become dashes (`don't` → `don-t`).
+      Truncating to ~50 characters and letting the numbered suffix disambiguate would fix
+      both. *Trigger: before links are shared in public.*
 - [ ] **Rate limits.** 30 posts/hour and 10 new experiences/hour. Never tripped.
 - [ ] **`merge_experiences`.** The only repair the exact-match rule has, and it has never been
       run. It is also granted to *nobody* — it needs the service role, so there is currently
@@ -129,7 +141,10 @@ you, not code from me.
 - [ ] **What does a Kream actually look like?** The dollop is a first pass and it carries the
       entire visual identity. (Q2)
 - [ ] **Does exact-match fragment the corpus?** The number to watch is median Kreamis per
-      Experience. (Q3)
+      Experience. (Q3) — **first evidence, 2026-08-25:** the first real post was "Chilling at
+      the airport at 3 AM cause the airport don't wake up until 5:30". Nobody will type that
+      string again, so it is a permanent singleton. One data point, but it is the predicted
+      failure mode appearing immediately, and it is how people naturally write.
 - [ ] **Should users be able to propose experience merges?** Admin-only does not scale past a few
       hundred users. (Q5)
 - [ ] **How do you seed the first hundred experiences?** Ideal seed is maximally universal and
