@@ -1,6 +1,5 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import type { FollowRow, PublicProfile } from './profiles';
 import { supabase } from './supabase';
 
 export type FeedItem = {
@@ -147,23 +146,17 @@ export function useToggleFollow() {
       await queryClient.cancelQueries({ queryKey: ['follow-list'] });
       const snapshots: [readonly unknown[], unknown][] = [];
 
-      for (const [key, value] of queryClient.getQueriesData<{ pages: FollowRow[][] }>({
-        queryKey: ['follow-list'],
+      // Every cache that holds a person with a follow button, in whichever
+      // shape it holds them. Missing one shows a button that did not respond
+      // to being pressed, which is the specific thing optimism is for.
+      for (const [key, value] of queryClient.getQueriesData<unknown>({
+        predicate: (q) => PERSON_CACHES.includes(q.queryKey[0] as string),
       })) {
         if (!value) continue;
+        const patched = patchPeople(value, profileId);
+        if (patched === value) continue;
         snapshots.push([key, value]);
-        queryClient.setQueryData(key, {
-          ...value,
-          pages: value.pages.map((page) => page.map((row) => flipFollow(row, profileId))),
-        });
-      }
-
-      for (const [key, value] of queryClient.getQueriesData<PublicProfile | null>({
-        queryKey: ['public-profile'],
-      })) {
-        if (!value || value.id !== profileId) continue;
-        snapshots.push([key, value]);
-        queryClient.setQueryData(key, flipFollow(value, profileId));
+        queryClient.setQueryData(key, patched);
       }
 
       return { snapshots };
@@ -179,6 +172,35 @@ export function useToggleFollow() {
       queryClient.invalidateQueries({ queryKey: ['public-profile'] });
     },
   });
+}
+
+/** Query keys whose data contains people with a follow button. */
+const PERSON_CACHES = ['follow-list', 'public-profile', 'search-profiles', 'suggested-profiles'];
+
+type Person = { id: string; is_following: boolean; follower_count: number };
+
+/**
+ * Applies the flip through whichever container the cache uses: a single
+ * profile, a flat list of results, or an infinite query's pages. Returns the
+ * original object when nothing matched, so the caller can skip snapshotting a
+ * cache it did not touch.
+ */
+function patchPeople(value: unknown, profileId: string): unknown {
+  if (Array.isArray(value)) {
+    return value.some((p: Person) => p?.id === profileId)
+      ? value.map((p: Person) => flipFollow(p, profileId))
+      : value;
+  }
+
+  if (value && typeof value === 'object' && 'pages' in value) {
+    const paged = value as { pages: Person[][] };
+    return paged.pages.some((page) => page.some((p) => p?.id === profileId))
+      ? { ...paged, pages: paged.pages.map((page) => page.map((p) => flipFollow(p, profileId))) }
+      : value;
+  }
+
+  const single = value as Person | null;
+  return single?.id === profileId ? flipFollow(single, profileId) : value;
 }
 
 /** Flips one person's follow state and their follower count, or returns them untouched. */

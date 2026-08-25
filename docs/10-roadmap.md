@@ -117,13 +117,17 @@ something slightly different, and land in the same thread.
 
 ## Phase 4 — Discovery and activity (2–3 sessions)
 
-- [ ] Discover screen: search + `active_experiences()`
-- [ ] User search by handle and display name
-- [ ] `notifications` table + triggers, with the **24h `experience_activity` cap**
-- [ ] Activity tab, unread badge, mark-all-read
-- [ ] `suggested_profiles` table and the onboarding follow step
+- [x] Discover screen: search + `active_experiences()`
+- [x] User search by handle and display name, via `search_profiles()`
+- [x] `notifications` table + triggers, with the **24h `experience_activity` cap**
+- [x] Activity tab, unread badge, mark-all-read
+- [x] `suggested_profiles` table and the onboarding follow step
 
 **Done when:** a brand-new account can find people and experiences without knowing anyone.
+
+> Full onboarding — the four screens in [08](08-ux-flows.md) — is Phase 5. What landed here
+> is the last of them: the suggested-follow list and the "leave your first Kreami" prompt,
+> shown once straight after a handle is claimed.
 
 ---
 

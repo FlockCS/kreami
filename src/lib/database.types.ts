@@ -259,6 +259,68 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          experience_id: string | null
+          id: string
+          kind: Database["public"]["Enums"]["notification_kind"]
+          kreami_id: string | null
+          read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          experience_id?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["notification_kind"]
+          kreami_id?: string | null
+          read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          experience_id?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["notification_kind"]
+          kreami_id?: string | null
+          read_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_kreami_id_fkey"
+            columns: ["kreami_id"]
+            isOneToOne: false
+            referencedRelation: "kreamis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -393,6 +455,35 @@ export type Database = {
         }
         Relationships: []
       }
+      suggested_profiles: {
+        Row: {
+          created_at: string
+          profile_id: string
+          rank: number
+          reason: string | null
+        }
+        Insert: {
+          created_at?: string
+          profile_id: string
+          rank?: number
+          reason?: string | null
+        }
+        Update: {
+          created_at?: string
+          profile_id?: string
+          rank?: number
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suggested_profiles_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -407,6 +498,25 @@ export type Database = {
           recent_count: number
           slug: string
           title: string
+        }[]
+      }
+      activity_feed: {
+        Args: { before?: string; lim?: number }
+        Returns: {
+          actor_avatar_url: string
+          actor_display_name: string
+          actor_handle: string
+          actor_id: string
+          created_at: string
+          experience_id: string
+          experience_slug: string
+          experience_title: string
+          id: string
+          kind: Database["public"]["Enums"]["notification_kind"]
+          kreami_id: string
+          kreami_note: string
+          kreami_rating: number
+          read_at: string
         }[]
       }
       assert_rate_limit: {
@@ -508,6 +618,7 @@ export type Database = {
         }[]
       }
       keepalive: { Args: never; Returns: string }
+      mark_notifications_read: { Args: never; Returns: number }
       merge_experiences: {
         Args: { loser: string; winner: string }
         Returns: undefined
@@ -606,7 +717,34 @@ export type Database = {
           title: string
         }[]
       }
+      search_profiles: {
+        Args: { lim?: number; q: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          display_name: string
+          follower_count: number
+          handle: string
+          id: string
+          is_following: boolean
+          is_self: boolean
+        }[]
+      }
       slugify: { Args: { raw: string }; Returns: string }
+      suggested_profiles: {
+        Args: { lim?: number }
+        Returns: {
+          avatar_url: string
+          bio: string
+          display_name: string
+          follower_count: number
+          handle: string
+          id: string
+          is_following: boolean
+          is_self: boolean
+          reason: string
+        }[]
+      }
       toggle_follow: {
         Args: { target: string }
         Returns: {
@@ -623,7 +761,11 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      notification_kind:
+        | "new_follower"
+        | "kreami_liked"
+        | "kreami_replied"
+        | "experience_activity"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -750,6 +892,13 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      notification_kind: [
+        "new_follower",
+        "kreami_liked",
+        "kreami_replied",
+        "experience_activity",
+      ],
+    },
   },
 } as const

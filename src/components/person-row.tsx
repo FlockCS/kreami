@@ -14,7 +14,7 @@ import { colors } from '@/theme/tokens';
  * list functions compute `is_following` for the viewer in the same pass, so
  * thirty rows cost one request, not thirty-one.
  */
-export function PersonRow({ person }: { person: FollowRow }) {
+export function PersonRow({ person, reason }: { person: FollowRow; reason?: string | null }) {
   const openProfile = useOpenProfile();
 
   return (
@@ -43,9 +43,14 @@ export function PersonRow({ person }: { person: FollowRow }) {
             ? ` · ${person.follower_count} ${person.follower_count === 1 ? 'FOLLOWER' : 'FOLLOWERS'}`
             : ''}
         </Text>
-        {person.bio ? (
+        {/*
+          A suggestion's reason replaces the bio rather than joining it: the
+          curated line is why this person is on the screen at all, and two
+          descriptions of the same stranger is one too many.
+        */}
+        {(reason ?? person.bio) ? (
           <Text className="mt-2 font-sans text-[14px] leading-5 text-body" numberOfLines={2}>
-            {person.bio}
+            {reason ?? person.bio}
           </Text>
         ) : null}
       </View>

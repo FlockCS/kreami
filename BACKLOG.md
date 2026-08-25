@@ -35,6 +35,10 @@ somebody else signs up.
       `signInWithIdToken`, so the browser never leaves our origin (free, more client code);
       or a Supabase custom domain, which needs a **paid plan plus the add-on**. *Trigger:
       before anyone but you signs in — this is a trust problem, not a polish one.*
+- [ ] **Curate `suggested_profiles`.** The table, the RPC and both surfaces that read it
+      (onboarding and Discover) are built and empty, so a new account is told "there is
+      nobody to suggest yet". It stays empty until there are accounts worth suggesting.
+      *Trigger: the same moment as seeding — before the private beta.*
 - [ ] **Seed 50–100 experiences.** An empty rating app is unusable; the first ten users need
       threads to join or they each create a lonely experience and leave. *Trigger: before the
       private beta.* (docs/10 Phase 5)
@@ -152,8 +156,8 @@ driving the real RPCs as ordinary signed-in users, cleaned up afterwards.
 
 ## Not built yet
 
-- [ ] **Admin surface.** No way to review reports, run merges, or read the duplicate-candidate
-      report except by hand in the Supabase SQL editor. Fine at this size; note when it stops
+- [ ] **Admin surface.** No way to review reports, run merges, edit `suggested_profiles`, or
+      read the duplicate-candidate report except by hand in the Supabase SQL editor. Fine at this size; note when it stops
       being fine. (docs/10 Phase 5)
 - [ ] **Experience thread as an RPC.** Currently intended as a direct PostgREST query with an
       embedded profile join. If sort variants or pagination get awkward, promote it to a

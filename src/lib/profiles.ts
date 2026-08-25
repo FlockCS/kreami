@@ -37,7 +37,11 @@ export type ProfileSort = 'recent' | 'highest' | 'lowest';
 
 export type FollowListKind = 'followers' | 'following';
 
-/** One person in a follower or following list. */
+/**
+ * One person in a list, wherever that list came from — followers, following,
+ * search results, suggestions. Every source computes `is_following` and
+ * `is_self` for the viewer, which is what lets PersonRow render any of them.
+ */
 export type FollowRow = {
   id: string;
   handle: string;
@@ -45,13 +49,54 @@ export type FollowRow = {
   bio: string | null;
   avatar_url: string | null;
   follower_count: number;
-  /** When the edge was created. Doubles as the keyset cursor. */
-  followed_at: string;
+  /** When the edge was created. Doubles as the keyset cursor. Absent where there is no edge. */
+  followed_at?: string;
   is_following: boolean;
   is_self: boolean;
 };
 
+/** A suggestion carries one extra line: why this person is worth following. */
+export type SuggestedProfile = FollowRow & { reason: string | null };
+
 const FOLLOW_PAGE = 30;
+
+/**
+ * People search. Goes through search_profiles() rather than a PostgREST
+ * filter, because the filter had to be built by interpolating the query into
+ * `.or(...)` — where a comma or a parenthesis is grammar, not text, and
+ * searching for "a,b" changed what the filter meant. See the migration.
+ */
+export function useSearchProfiles(query: string) {
+  const q = query.trim();
+
+  return useQuery({
+    queryKey: ['search-profiles', q.toLowerCase()],
+    enabled: q.length >= 2,
+    staleTime: 30_000,
+    queryFn: async (): Promise<FollowRow[]> => {
+      const { data, error } = await supabase.rpc('search_profiles', { q, lim: 10 });
+      if (error) throw new Error(error.message);
+      return (data ?? []) as FollowRow[];
+    },
+  });
+}
+
+/**
+ * The hand-curated list shown to somebody who follows nobody. People you
+ * already follow are filtered out server-side, so this shrinks as it is used.
+ */
+export function useSuggestedProfiles(enabled = true) {
+  return useQuery({
+    queryKey: ['suggested-profiles'],
+    enabled,
+    staleTime: 5 * 60_000,
+    queryFn: async (): Promise<SuggestedProfile[]> => {
+      const { data, error } = await supabase.rpc('suggested_profiles', { lim: 10 });
+      if (error) throw new Error(error.message);
+      return (data ?? []) as SuggestedProfile[];
+    },
+  });
+}
 
 /**
  * A follower or following list, keyset-paginated on the edge's created_at for

@@ -58,7 +58,11 @@ function AuthGate({ children }: { children: ReactNode }) {
       return;
     }
 
-    if (atSignIn || atClaimHandle) router.replace('/');
+    // A handle was just claimed: the last onboarding step is next. Both this
+    // and claim-handle's own success handler navigate there, so it does not
+    // matter which of them wins the race — they agree.
+    if (atClaimHandle) router.replace('/welcome');
+    else if (atSignIn) router.replace('/');
   }, [isRestoring, session, profile.isPending, needsHandle, atSignIn, atClaimHandle, router]);
 
   return children;

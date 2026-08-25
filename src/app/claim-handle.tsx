@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
-import { useProfile, useSession } from '@/lib/auth';
+import { useProfile, useSession, type Profile } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { colors } from '@/theme/tokens';
 
@@ -23,6 +24,7 @@ export default function ClaimHandle() {
   const { session } = useSession();
   const profile = useProfile();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const [handle, setHandle] = useState('');
   const [debounced, setDebounced] = useState('');
@@ -54,8 +56,18 @@ export default function ClaimHandle() {
       if (error) throw new Error(error.message);
       return data as string;
     },
-    onSuccess: () => {
-      // The router sends us onward once the profile reports a handle.
+    onSuccess: (claimed) => {
+      // Write the handle straight into the cache rather than navigating and
+      // hoping a refetch lands first. It did not: the next screen greeted
+      // people as "You're in, @" because it rendered against a profile that
+      // still said null. claim_handle returns the handle it claimed, so there
+      // is nothing to wait for.
+      queryClient.setQueryData(['profile', session?.user.id], (old: Profile | null | undefined) =>
+        old ? { ...old, handle: claimed } : old,
+      );
+      router.replace('/welcome');
+
+      // Still refetch, because the server may have normalised something.
       queryClient.invalidateQueries({ queryKey: ['profile', session?.user.id] });
     },
   });

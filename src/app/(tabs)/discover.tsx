@@ -1,46 +1,16 @@
-import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Kream } from '@/components/kream-rating';
-import { useSession } from '@/lib/auth';
-import { useActiveExperiences } from '@/lib/feed';
-import { useOpenProfile } from '@/lib/profiles';
-import { useSearchExperiences } from '@/lib/experiences';
-import { supabase } from '@/lib/supabase';
 import { LoadError } from '@/components/load-error';
+import { PersonRow } from '@/components/person-row';
+import { useSession } from '@/lib/auth';
+import { useSearchExperiences } from '@/lib/experiences';
+import { useActiveExperiences } from '@/lib/feed';
+import { useSearchProfiles, useSuggestedProfiles } from '@/lib/profiles';
 import { colors } from '@/theme/tokens';
-
-type PersonHit = {
-  id: string;
-  handle: string;
-  display_name: string;
-};
-
-function usePeopleSearch(query: string, excludeId: string | undefined) {
-  const q = query.trim();
-  return useQuery({
-    queryKey: ['people-search', q.toLowerCase(), excludeId],
-    enabled: q.length >= 2,
-    staleTime: 30_000,
-    queryFn: async (): Promise<PersonHit[]> => {
-      let request = supabase
-        .from('profiles')
-        .select('id, handle, display_name')
-        .not('handle', 'is', null)
-        .or(`handle.ilike.%${q}%,display_name.ilike.%${q}%`)
-        .limit(8);
-      // Finding yourself in a list of people to follow is noise: you cannot
-      // follow yourself, and the row leads somewhere you already are.
-      if (excludeId) request = request.neq('id', excludeId);
-      const { data, error } = await request;
-      if (error) throw new Error(error.message);
-      return (data ?? []) as PersonHit[];
-    },
-  });
-}
 
 /**
  * Discovery is the answer to cold start, and it is open to logged-out
@@ -57,10 +27,12 @@ export default function Discover() {
   }, [query]);
 
   const { session } = useSession();
-  const openProfile = useOpenProfile();
   const experiences = useSearchExperiences(debounced);
-  const people = usePeopleSearch(debounced, session?.user.id);
+  const people = useSearchProfiles(debounced);
   const active = useActiveExperiences();
+  // Only worth showing to somebody who could act on it, and only when they
+  // are not already searching for a specific person.
+  const suggestions = useSuggestedProfiles(Boolean(session) && !debounced.trim());
 
   const searching = debounced.trim().length >= 2;
 
@@ -90,24 +62,8 @@ export default function Discover() {
             {people.data && people.data.length > 0 ? (
               <>
                 <Text className="py-4 font-sans text-[10px] tracking-label text-muted">PEOPLE</Text>
-                {people.data.map((p) => (
-                  <Pressable
-                    key={p.id}
-                    accessibilityRole="link"
-                    onPress={() => openProfile(p.handle)}
-                    className="flex-row items-center gap-3 border-b border-rule py-4 active:bg-fill"
-                  >
-                    <View
-                      className="h-9 w-9 rounded-full"
-                      style={{ backgroundColor: colors.fill }}
-                    />
-                    <View>
-                      <Text className="font-serif text-[19px] leading-6 text-ink">
-                        {p.display_name}
-                      </Text>
-                      <Text className="font-sans text-[11px] text-muted">@{p.handle}</Text>
-                    </View>
-                  </Pressable>
+                {people.data.map((person) => (
+                  <PersonRow key={person.id} person={person} />
                 ))}
               </>
             ) : null}
@@ -150,6 +106,17 @@ export default function Discover() {
           </>
         ) : (
           <>
+            {suggestions.data && suggestions.data.length > 0 ? (
+              <>
+                <Text className="py-4 font-sans text-[10px] tracking-label text-muted">
+                  PEOPLE TO FOLLOW
+                </Text>
+                {suggestions.data.map((person) => (
+                  <PersonRow key={person.id} person={person} reason={person.reason} />
+                ))}
+              </>
+            ) : null}
+
             <Text className="py-4 font-sans text-[10px] tracking-label text-muted">
               BEING RATED THIS WEEK
             </Text>

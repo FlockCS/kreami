@@ -344,6 +344,131 @@ try {
   });
   check('nor can a reply be inserted directly', r.status >= 400, 'HTTP ' + r.status);
 
+  console.log('\nNotifications\n');
+  // bob followed alice and liked her Kreami earlier in this run, so alice
+  // should have been told about both without anything else happening.
+  r = await rpc(alice.token, 'activity_feed', { lim: 30 });
+  const feedRows = Array.isArray(r.body) ? r.body : [];
+  const kinds = feedRows.map((n) => n.kind);
+  check('alice was told about the follow', kinds.includes('new_follower'), JSON.stringify(kinds));
+  check('and about the like', kinds.includes('kreami_liked'), JSON.stringify(kinds));
+
+  const follower = feedRows.find((n) => n.kind === 'new_follower');
+  check('the row names the actor', follower?.actor_handle === bobHandle, follower?.actor_handle);
+  check('and starts out unread', follower?.read_at === null);
+
+  // bob rated the same experience alice had already rated, which is the
+  // retention loop that owes nothing to the follow graph.
+  check(
+    'rating an experience notifies everyone already on it',
+    kinds.includes('experience_activity'),
+    JSON.stringify(kinds),
+  );
+  const activity = feedRows.find((n) => n.kind === 'experience_activity');
+  check('and carries the experience it happened on', Boolean(activity?.experience_slug));
+
+  // The cap. bob's third post was on a DIFFERENT experience, so use a fresh
+  // one: alice rates something, bob joins it twice, and the second must be
+  // silent because one already landed inside the window.
+  const capTitle = `Being notified twice about ${suffix}`;
+  await rpc(alice.token, 'post_kreami', { raw_title: capTitle, rating: 3 });
+  r = await rpc(bob.token, 'post_kreami', { raw_title: capTitle, rating: 5 });
+  const capExperience = (Array.isArray(r.body) ? r.body[0] : r.body)?.experience_id;
+  if (capExperience) experiences.add(capExperience);
+
+  r = await rest(
+    alice.token,
+    `notifications?select=id&kind=eq.experience_activity&experience_id=eq.${capExperience}`,
+  );
+  const firstWave = Array.isArray(r.body) ? r.body.length : -1;
+  check(
+    'the first person to join an experience notifies you once',
+    firstWave === 1,
+    String(firstWave),
+  );
+
+  // A third account joining the same experience inside 24h must not add a row.
+  const carol = await makeUser('carol');
+  created.push(carol);
+  await rpc(carol.token, 'claim_handle', { new_handle: `zz_c${suffix}` });
+  await rpc(carol.token, 'post_kreami', { raw_title: capTitle, rating: 1 });
+
+  r = await rest(
+    alice.token,
+    `notifications?select=id&kind=eq.experience_activity&experience_id=eq.${capExperience}`,
+  );
+  const secondWave = Array.isArray(r.body) ? r.body.length : -1;
+  check('a second one inside 24h is capped (docs/06)', secondWave === 1, String(secondWave));
+
+  // Self-actions are silent: carol liking her own Kreami tells nobody.
+  r = await rest(carol.token, `kreamis?select=id&user_id=eq.${carol.id}`);
+  const carolKreami = r.body?.[0]?.id;
+  await rpc(carol.token, 'toggle_like', { target: carolKreami });
+  r = await rest(carol.token, `notifications?select=id&kind=eq.kreami_liked`);
+  check('liking your own Kreami notifies nobody', r.body?.length === 0, JSON.stringify(r.body));
+
+  r = await rest(bob.token, `notifications?select=id&user_id=eq.${alice.id}`);
+  check(
+    "cannot read somebody else's notifications",
+    Array.isArray(r.body) && r.body.length === 0,
+    JSON.stringify(r.body).slice(0, 120),
+  );
+
+  r = await rpc(alice.token, 'mark_notifications_read', {});
+  check(
+    'mark-all-read clears the unread rows',
+    typeof r.body === 'number' && r.body > 0,
+    JSON.stringify(r.body),
+  );
+
+  r = await rest(alice.token, 'notifications?select=id&read_at=is.null');
+  check('and leaves nothing unread', r.body?.length === 0, JSON.stringify(r.body));
+
+  console.log('\nFinding people\n');
+  r = await rpc(null, 'search_profiles', { q: aliceHandle });
+  let hits = Array.isArray(r.body) ? r.body : [];
+  check(
+    'an exact handle search finds them',
+    hits[0]?.id === alice.id,
+    JSON.stringify(hits.map((h) => h.handle)),
+  );
+  check('and works logged out — it is the top of the funnel', hits.length > 0);
+
+  r = await rpc(bob.token, 'search_profiles', { q: 'Alice' });
+  hits = Array.isArray(r.body) ? r.body : [];
+  check(
+    'display names are searchable too',
+    hits.some((h) => h.id === alice.id),
+  );
+  check(
+    'and the row knows bob follows her',
+    hits.find((h) => h.id === alice.id)?.is_following === true,
+  );
+
+  r = await rpc(alice.token, 'search_profiles', { q: aliceHandle });
+  hits = Array.isArray(r.body) ? r.body : [];
+  check('you are marked as yourself in your own results', hits[0]?.is_self === true);
+
+  // The whole reason this is an RPC: PostgREST's .or() filter treats these as
+  // grammar, so interpolating them client-side changed what was being asked.
+  for (const nasty of ['a,b', 'a)b', '*', '%']) {
+    r = await rpc(bob.token, 'search_profiles', { q: nasty });
+    check(`"${nasty}" is a search term, not syntax`, r.status === 200, 'HTTP ' + r.status);
+  }
+
+  r = await rpc(bob.token, 'search_profiles', { q: 'a' });
+  check('one character is too short to search', Array.isArray(r.body) && r.body.length === 0);
+
+  r = await rpc(bob.token, 'suggested_profiles', {});
+  check(
+    'suggestions are readable and empty until curated',
+    Array.isArray(r.body),
+    JSON.stringify(r.body).slice(0, 120),
+  );
+
+  r = await rest(bob.token, 'suggested_profiles?select=profile_id');
+  check('the curation table itself is not client-readable', r.status >= 400, 'HTTP ' + r.status);
+
   console.log('\nThe avatar bucket\n');
   r = await putAvatar(alice.token, `${alice.id}/mine.png`);
   check('you can write into your own folder', r.status < 400, 'HTTP ' + r.status);

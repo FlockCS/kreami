@@ -145,6 +145,32 @@ client bug rather than something a user meets.
 `authenticated` (D16). A new filename on every upload is deliberate — it is what stops CDN
 and on-device image caches from serving the previous photo.
 
+### `activity_feed(before timestamptz, lim int)`
+Your notifications, keyset-paginated, each joined to its actor and to the experience or
+Kreami it is about — one call per screen rather than one per row. The joins are outer: a
+deleted actor, a hidden Kreami or a merged experience degrades a row rather than removing it
+from your history.
+
+### `mark_notifications_read()` → `int`
+Marks everything unread as read and returns how many rows it cleared, so the badge can
+settle without a second round trip. Called when the Activity tab opens.
+
+### `search_profiles(q text, lim int)`
+People search by handle and display name. Exact handle matches sort first, then prefix
+matches, then follower count. Returns `is_following` and `is_self` for the viewer, so a
+result row carries its own follow button state. Open to `anon` — searching for people is
+part of the logged-out funnel.
+
+**Why a function rather than a PostgREST filter:** the client version had to build
+`.or(\`handle.ilike.%${q}%,...\`)` by interpolation, and in that grammar a comma or a
+parenthesis is syntax rather than text.
+
+### `suggested_profiles(lim int)`
+The hand-curated follow list for a new account, minus anyone they already follow and
+themselves. The `suggested_profiles` table behind it has no client grants at all: it is
+edited in the SQL editor. v1 deliberately has no recommendation logic — see
+[06](06-feeds-and-social.md).
+
 ### `handle_available(candidate text)` → `boolean`
 Live availability check for the handle picker. True when the handle is well-formed,
 unreserved and unclaimed. Signed-in callers only.
