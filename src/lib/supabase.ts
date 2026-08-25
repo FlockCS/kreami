@@ -17,6 +17,21 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 /**
+ * The URL must be the bare project origin. The Supabase dashboard also shows a
+ * REST URL ending in `/rest/v1`, and copying that instead produces requests to
+ * `/rest/v1/rest/v1/...` that fail far from the cause. Fail loudly here instead.
+ */
+{
+  const { pathname } = new URL(supabaseUrl);
+  if (pathname !== '/' && pathname !== '') {
+    throw new Error(
+      `EXPO_PUBLIC_SUPABASE_URL must be the project origin with no path, but got "${supabaseUrl}". ` +
+        `Use "${new URL(supabaseUrl).origin}".`,
+    );
+  }
+}
+
+/**
  * On web the client uses localStorage by default, which is what we want.
  * On native the session lives in the keychain/keystore via the adapter above.
  */

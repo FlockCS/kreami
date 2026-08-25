@@ -39,9 +39,22 @@ export default function FoundationCheck() {
     queryFn: async () => true,
   });
 
-  const hasSupabaseEnv = Boolean(
-    process.env.EXPO_PUBLIC_SUPABASE_URL && process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
-  );
+  /**
+   * A real round trip: env -> client -> PostgREST -> Postgres -> back.
+   * Imported lazily and inside the try so an unconfigured .env.local surfaces
+   * as a failed check with the reason, rather than crashing the screen whose
+   * whole job is to tell you it is unconfigured.
+   */
+  const supabaseCheck = useQuery({
+    queryKey: ['supabase-reachable'],
+    retry: false,
+    queryFn: async () => {
+      const { supabase } = await import('@/lib/supabase');
+      const { data, error } = await supabase.rpc('keepalive');
+      if (error) throw new Error(error.message);
+      return data as string;
+    },
+  });
 
   return (
     <SafeAreaView className="flex-1 bg-paper" style={{ backgroundColor: colors.paper }}>
@@ -76,11 +89,13 @@ export default function FoundationCheck() {
           />
           <Row
             label="Supabase"
-            status={hasSupabaseEnv ? 'ok' : 'pending'}
+            status={supabaseCheck.isSuccess ? 'ok' : 'pending'}
             detail={
-              hasSupabaseEnv
-                ? 'Project URL and anon key found in the environment.'
-                : 'Copy .env.example to .env.local and add your project URL and anon key.'
+              supabaseCheck.isSuccess
+                ? `Reached the database. Server clock: ${supabaseCheck.data}`
+                : supabaseCheck.isError
+                  ? supabaseCheck.error.message
+                  : 'Contacting the database…'
             }
           />
         </View>

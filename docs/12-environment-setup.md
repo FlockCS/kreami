@@ -42,7 +42,13 @@ Then, locally:
 cp .env.example .env.local
 ```
 
-Fill `.env.local` with the **dev** project's values:
+Fill `.env.local` with the **dev** project's values.
+
+> **Copy the Project URL, not the REST URL.** The dashboard shows both, and the REST one
+> ends in `/rest/v1`. Pasting that produces requests to `/rest/v1/rest/v1/...` which fail
+> in confusing ways. The app now refuses to start with a clear message if the URL has any
+> path on it, but it is still the easiest mistake to make on this page.
+
 
 ```
 EXPO_PUBLIC_SUPABASE_URL=https://YOUR-DEV-REF.supabase.co
@@ -138,6 +144,11 @@ site lands at `https://kreami.pages.dev`.
 
 Supabase pauses free projects after ~7 days of inactivity, and a paused project is a dead
 app. `keepalive.yml` runs every three days to prevent that.
+
+It calls a `keepalive()` SQL function rather than a health endpoint. That is deliberate: it
+is the *Postgres instance* that pauses, and `/auth/v1/health` can answer without touching
+the database. `/rest/v1/` is not an option either — that endpoint now requires the
+`service_role` key, which must never reach CI.
 
 One catch worth knowing now: **GitHub disables scheduled workflows in a repository with no
 commit activity for 60 days.** If Kreami goes quiet over a long break, the cron stops, then

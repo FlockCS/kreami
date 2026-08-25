@@ -30,8 +30,10 @@ Nothing user-visible. Everything downstream depends on it.
 **Needs an account, so it needs you** — full instructions in
 [12 — Environment Setup](12-environment-setup.md):
 
-- [ ] Create `kreami-dev` and `kreami-prod`; fill `.env.local`
-- [ ] `supabase db push` the first migration; regenerate types
+- [x] Create `kreami-dev`; fill `.env.local` *(done 2026-08-25)*
+- [x] `supabase db push` migrations; regenerate types *(done — the foundation screen now
+      completes a real round trip to Postgres)*
+- [ ] Create `kreami-prod` (not needed until deploy)
 - [ ] Create the Cloudflare Pages project `kreami`
 - [ ] Add the nine GitHub secrets and the `production` environment
 - [ ] Watch all four workflows go green once

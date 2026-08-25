@@ -3,6 +3,11 @@ name: Supabase keepalive
 # Supabase pauses free projects after ~7 days without activity, and a paused
 # project is a dead app. This runs every three days to keep both alive.
 #
+# It calls the keepalive() function rather than a plain health endpoint: it is
+# the Postgres instance that pauses, and /auth/v1/health can answer without
+# touching the database. /rest/v1/ is not usable either — that endpoint now
+# requires the service_role key, which must never reach CI for a public build.
+#
 # Note: GitHub disables scheduled workflows in a repository with no commit
 # activity for 60 days. If the project goes quiet for that long, re-enable this
 # from the Actions tab.
@@ -22,11 +27,14 @@ jobs:
           URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
           KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
         run: |
-          code=$(curl -sS -o /dev/null -w '%{http_code}' \
+          if [ -z "$URL" ]; then echo "production not configured; skipping"; exit 0; fi
+          body=$(curl -sS -X POST "${URL%/}/rest/v1/rpc/keepalive" \
             -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
-            "$URL/rest/v1/")
-          echo "production responded $code"
-          [ "$code" -lt 400 ] || exit 1
+            -H "Content-Type: application/json" -d '{}' \
+            -w '\n%{http_code}')
+          code=$(echo "$body" | tail -1)
+          echo "production responded $code: $(echo "$body" | head -1)"
+          [ "$code" = "200" ] || exit 1
 
       - name: Ping development
         env:
@@ -34,8 +42,10 @@ jobs:
           KEY: ${{ secrets.DEV_SUPABASE_ANON_KEY }}
         run: |
           if [ -z "$URL" ]; then echo "dev project not configured; skipping"; exit 0; fi
-          code=$(curl -sS -o /dev/null -w '%{http_code}' \
+          body=$(curl -sS -X POST "${URL%/}/rest/v1/rpc/keepalive" \
             -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
-            "$URL/rest/v1/")
-          echo "development responded $code"
-          [ "$code" -lt 400 ] || exit 1
+            -H "Content-Type: application/json" -d '{}' \
+            -w '\n%{http_code}')
+          code=$(echo "$body" | tail -1)
+          echo "development responded $code: $(echo "$body" | head -1)"
+          [ "$code" = "200" ] || exit 1
