@@ -17,10 +17,15 @@ somebody else signs up.
 - [ ] **Resend SMTP.** Supabase's built-in sender allows roughly 2–4 emails per hour. Magic
       links will silently fail for real users. Free tier, then Authentication → Emails →
       SMTP. *Trigger: before anyone but you signs in.*
-- [ ] **User blocks.** A public app with replies and no block leaves a harassed user with
-      only "report" or "leave". Report handles content; it does not handle a person.
-      *Trigger: the first sign of harassment — and this jumps the entire queue.*
-      (docs/11 Q1)
+- [ ] **User blocks.** Report handles content; it does not handle a person. Less urgent
+      since replies were cut (D18) — a rating is aimed at an experience, not at somebody —
+      but still the thing that must exist before replies come back.
+      *Trigger: the first sign of harassment, or reinstating replies, whichever comes
+      first.* (docs/11 Q1)
+- [ ] **Replies, once blocks exist.** Schema, trigger and `post_reply()` are built and
+      verified; only the grant was withdrawn. Restoring is one `grant` plus the UI: a reply
+      list under each Kreami on the experience thread, and a composer.
+      *Trigger: after blocks ship.* (docs/11 D18)
 - [ ] **App icon.** Still the Expo logo, in `assets/`. *Trigger: before anything is shared
       or installed.*
 - [ ] **Google consent screen shows the raw Supabase project ref.** Users see

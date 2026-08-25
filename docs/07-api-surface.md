@@ -102,6 +102,10 @@ average Kream given, and whether the viewer follows them.
 **"Average Kream given" is a personality metric** — it tells you at a glance whether someone
 is a soft touch or a hater, and it's worth surfacing prominently on the profile.
 
+### `post_reply(target uuid, body text)` — **deferred, granted to nobody**
+Works, and is closed. Restoring it is one `grant execute … to authenticated` once user
+blocks exist. See [11 — Decisions](11-decisions-and-open-questions.md), D18.
+
 ### `toggle_follow(target uuid)` / `toggle_like(kreami uuid)`
 Idempotent toggles returning the new state and count. One call, no read-then-write race.
 

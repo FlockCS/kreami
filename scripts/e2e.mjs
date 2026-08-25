@@ -226,7 +226,7 @@ try {
     feed.some((f) => f.user_id === bob.id),
   );
 
-  console.log('\nLikes and replies\n');
+  console.log('\nLikes, and replies staying closed\n');
   r = await rpc(bob.token, 'toggle_like', { target: edit.kreami_id });
   let like = Array.isArray(r.body) ? r.body[0] : r.body;
   check('bob likes it', like?.liked === true && like?.like_count === 1, JSON.stringify(r.body));
@@ -238,14 +238,21 @@ try {
     like?.liked === false && like?.like_count === 0,
   );
 
+  // Replies are deferred from v1 (D18). The table, trigger and post_reply()
+  // still exist and still work; the grant is what was withdrawn. This asserts
+  // the closure holds, so nobody can write rows into a surface with no reader.
   r = await rpc(bob.token, 'post_reply', { target: edit.kreami_id, body: 'Harsh.' });
-  check('bob replies', r.status === 200 && typeof r.body === 'string', JSON.stringify(r.body));
+  check('replies are closed (D18)', r.status >= 400, 'HTTP ' + r.status);
 
   r = await rest(alice.token, `kreamis?select=reply_count&id=eq.${edit.kreami_id}`);
-  check('reply_count incremented', r.body?.[0]?.reply_count === 1, JSON.stringify(r.body));
+  check('reply_count stayed at zero', r.body?.[0]?.reply_count === 0, JSON.stringify(r.body));
 
-  r = await rpc(bob.token, 'post_reply', { target: edit.kreami_id, body: '   ' });
-  check('an empty reply is refused', r.status >= 400);
+  r = await fetch(URL_BASE + '/rest/v1/replies', {
+    method: 'POST',
+    headers: { ...headers(bob.token), Prefer: 'return=minimal' },
+    body: JSON.stringify({ kreami_id: edit.kreami_id, user_id: bob.id, body: 'direct' }),
+  });
+  check('nor can a reply be inserted directly', r.status >= 400, 'HTTP ' + r.status);
 
   console.log('\nWhat a signed-in user must NOT be able to do\n');
   r = await rpc(bob.token, 'create_experience', { raw_title: 'sneaking one in' });

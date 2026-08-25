@@ -112,7 +112,7 @@ and it makes the one-per-experience rule feel like a feature rather than a rejec
 │ "Structurally unsound. Emotionally         │
 │  perfect."                                 │
 │                                            │
-│ ♡ 12   ↩ 3        4.2 avg · 38 Kreamis  →  │
+│ ♡ 12              4.2 avg · 38 Kreamis  →  │
 └────────────────────────────────────────────┘
 ```
 

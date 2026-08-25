@@ -105,7 +105,7 @@ something slightly different, and land in the same thread.
 - [x] Other users' profiles, with `public_profile()` and `profile_kreamis()`
 - [x] **Empty-feed backfill** — the global feed inline when the following feed is thin
 - [x] Tab shell: Home, Discover, compose, You
-- [ ] Replies (schema and `post_reply()` exist; no UI yet)
+- [x] ~~Replies~~ — cut from v1 (D18). Schema and `post_reply()` kept, grant withdrawn.
 - [ ] Follower / following lists
 
 **Done when:** two accounts can follow each other and see each other's Kreamis in Home.

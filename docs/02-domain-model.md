@@ -71,10 +71,14 @@ Self-follows are rejected. Unfollow is a hard delete.
 A user liking a Kreami. Unique per (user, kreami). Cheap, reversible, uncounted below the
 fold. Self-likes are permitted (nobody cares) but not counted in notifications.
 
-### Reply
+### Reply — *deferred from v1*
 A short text response to a Kreami. Max 150 characters, matching notes.
-**One level deep only** — no threaded replies-to-replies. This is a deliberate ceiling that
-kills a whole class of UI and moderation complexity.
+**One level deep only** — no threaded replies-to-replies.
+
+**Not in v1.** The table, the trigger and `post_reply()` exist and work, but the function is
+granted to nobody and nothing renders a reply. A rating is aimed at an *experience*; a reply
+is aimed at a *person*, and Kreami has no block feature yet. See
+[11 — Decisions](11-decisions-and-open-questions.md), D18.
 
 ### ExperienceAlias
 A normalized string that routes to a Experience. Created when Experiences merge, or when an admin

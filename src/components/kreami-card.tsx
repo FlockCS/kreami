@@ -35,29 +35,6 @@ function Heart({ filled }: { filled: boolean }) {
   );
 }
 
-function ReplyArrow() {
-  return (
-    <Svg width={15} height={15} viewBox="0 0 24 24">
-      <Path
-        d="M9 17l-5-5 5-5"
-        fill="none"
-        stroke={colors.muted}
-        strokeWidth={1.6}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Path
-        d="M4 12h11a5 5 0 0 1 5 5v1"
-        fill="none"
-        stroke={colors.muted}
-        strokeWidth={1.6}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
-
 /**
  * One Kreami in a feed.
  *
@@ -130,18 +107,6 @@ export function KreamiCard({
             >
               {item.like_count}
             </Text>
-          </Pressable>
-
-          <Pressable
-            accessibilityRole="link"
-            accessibilityLabel={`${item.reply_count} replies`}
-            onPress={() =>
-              router.push({ pathname: '/e/[slug]', params: { slug: item.experience_slug } })
-            }
-            className="min-h-11 flex-row items-center gap-[6px] pr-2"
-          >
-            <ReplyArrow />
-            <Text className="font-sans text-[12px] text-muted">{item.reply_count}</Text>
           </Pressable>
         </View>
 

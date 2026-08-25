@@ -201,6 +201,32 @@ differentiator.
 shared, and the client did not reference the tables yet. After launch this would touch shared
 links and muscle memory.
 
+---
+
+### D18 — Replies are cut from v1
+**Chosen (2026-08-25):** the `replies` table, its counter trigger and `post_reply()` stay in
+the schema, but the function is granted to nobody and no surface reads or writes one. The
+`↩` counter is gone from the feed card.
+
+**Why:** a rating is aimed at an *experience*; a reply is aimed at a *person*. Replies are
+where harassment lands, and Kreami has no block feature — Q1 below. Shipping replies is what
+turns that gap from theoretical into urgent, and blocks are not built.
+
+**Why revoke rather than only hide the UI:** a write path with no read path is the worst of
+both. Anyone could post replies through the API, nobody would ever see them, and the rows
+would still accumulate and still need moderating. Hiding the button would have made the cut
+nominal rather than real.
+
+**The counter was lying.** Every feed card showed `↩ 3` for something with no way to read or
+write it. Removing it is the honest state while there is no reply surface.
+
+**Cost:** Kreami loses conversation. Letterboxd got a long way on ratings and likes alone, so
+this is survivable, and the thread on an experience is still a conversation of a kind — just
+one conducted in ratings rather than comments.
+
+**Reversing it** is a single `grant execute on function public.post_reply(uuid, text) to
+authenticated`, plus the UI. Do it after blocks, not before.
+
 ## Open questions
 
 Things genuinely unresolved. Each needs an answer eventually; none blocks Phase 0.
