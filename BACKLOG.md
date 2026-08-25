@@ -75,36 +75,27 @@ somebody else signs up.
 
 ## Unverified
 
-Built but never exercised. Each needs an authenticated session or real data, which the
-boundary tests deliberately cannot provide.
+Built but never exercised. `npm run e2e` covers most of this now — two throwaway accounts
+driving the real RPCs as ordinary signed-in users, cleaned up afterwards.
 
-- [x] ~~`post_kreami` creating an experience, and the one-per-user constraint turning a
-      second post into an edit.~~ Verified 2026-08-25 against live data: one experience, one
-      Kreami with `updated_at > created_at`, counters reconciling exactly with no drift.
-- [x] ~~Exact-match joining across case.~~ Verified 2026-08-25 from the resolution log:
-      "…at 3 AM… wake up…" resolved `new`, then "…at 3 am… wAke up…" resolved `exact`.
-      Trailing-whitespace normalisation too — `"Vibe coding Kreami\n"` then
-      `"Vibe coding Kreami"` matched.
-- [ ] **The punctuation split.** "Jury duty" and "Jury duty!" become separate experiences.
-      Known and accepted (D4), but nobody has seen it happen yet.
-- [x] ~~Resolution-log outcomes readable.~~ The dev `service_role` key now sits in
-      `.env.local`, so local scripts can read the log, run merges and create test accounts.
-      A real admin surface is still needed before anyone else operates this — see below.
-- [ ] **Slug collision handling.** `create_experience` retries with a numbered suffix when two
-      different titles slugify the same ("jury duty" and "jury duty!"). The retry loop has
-      never executed.
-- [ ] **Slug length is unbounded.** An 80-character title produces an ~80-character slug —
-      the first real post gave
-      `chilling-at-the-airport-at-3-am-cause-the-airport-don-t-wake-up-until-5-30`. Works,
-      but the URLs are unwieldy to share and apostrophes become dashes (`don't` → `don-t`).
-      Truncating to ~50 characters and letting the numbered suffix disambiguate would fix
-      both. *Trigger: before links are shared in public.*
-- [ ] **Rate limits.** 30 posts/hour and 10 new experiences/hour. Never tripped.
-- [ ] **`merge_experiences`.** The only repair the exact-match rule has, and it has never been
-      run. It is also granted to *nobody* — it needs the service role, so there is currently
-      no way to invoke it outside a SQL console. *Trigger: the first real duplicate.*
-- [ ] **Counter triggers under concurrency.** `kreami_count` and `rating_sum` are
-      trigger-maintained; drift only shows up under real load.
+- [x] ~~The matching pipeline end to end.~~ Verified by `npm run e2e`: create vs edit,
+      case-insensitive joining, the punctuation split, counters after an edit.
+- [x] ~~Slug collision handling.~~ Two titles differing only by a `!` slugify identically;
+      the second gets `-2`. Asserted in `e2e`.
+- [x] ~~Follow, like and reply round trips, and follower counters.~~ Verified in `e2e`,
+      including that liking twice unlikes and that nobody can follow themselves.
+- [x] ~~Home feed against a real follow graph.~~ Bob follows Alice and sees her Kreami plus
+      his own.
+- [x] ~~Column grants (D16).~~ `e2e` confirms a signed-in user cannot write their own
+      `follower_count` or `handle`, cannot edit somebody else's Kreami, and cannot call
+      `create_experience`, `resolve_experience` or `merge_experiences`.
+- [ ] **Rate limits.** 30 posts/hour, 10 new experiences/hour, 100 follows/hour. Never
+      tripped — testing them means burning the window, so it needs a dedicated run.
+- [ ] **`merge_experiences`.** Correctly unreachable by users; never actually run, even as
+      admin. *Trigger: the first real duplicate.*
+- [ ] **Keyset pagination.** The `before` cursor has never been passed with enough rows to
+      page.
+- [ ] **Counter drift under concurrency.** Only shows up under real load.
 
 ## Unverified — Phase 3
 
@@ -114,10 +105,15 @@ boundary tests deliberately cannot provide.
       low — but rotating costs one click (Project Settings → API → Legacy keys) and then
       re-running the fetch. *Trigger: your call; do it before this project ever holds
       anything real.*
-- [ ] **Test accounts still need one switch.** `scripts/test-account.mjs` works via the
-      anon key only if the project allows sign-up without confirmation. It does not, and the
-      built-in SMTP limit is exhausted. Either turn off "Confirm email" for kreami-dev, or
-      rewrite the script to use the service-role admin API now that the key is available.
+- [ ] **Email confirmation is OFF on kreami-dev.** That is what makes `npm run e2e`
+      possible, and it must be back ON before anyone real signs up, or anybody can register
+      an address they do not own. *Trigger: before the private beta — and this one is easy
+      to forget.*
+- [ ] **Deleting an account leaves its experiences behind** with zero Kreamis, because
+      `experiences.created_by` is `on delete set null`. Right for the product — an
+      experience outlives the person who first rated it — but it means zero-Kreami
+      experiences accumulate. Related to Q4. *Trigger: when zero-Kreami experiences start
+      showing up in search.*
 - [ ] **A second account.** The follow graph cannot be tested with one user —
       `toggle_follow` rejects self-follows by constraint, so following, follower counts and
       a home feed containing somebody else's Kreami are all unverifiable until a second

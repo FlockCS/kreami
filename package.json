@@ -23,7 +23,8 @@
     "db:types:local": "supabase gen types typescript --local --schema public > src/lib/database.types.ts",
     "verify:storage": "node scripts/verify-chunked-storage.ts",
     "smoke": "node scripts/smoke.mjs",
-    "test:account": "node scripts/test-account.mjs"
+    "test:account": "node scripts/test-account.mjs",
+    "e2e": "node scripts/e2e.mjs"
   },
   "dependencies": {
     "@expo-google-fonts/archivo": "^0.4.2",
