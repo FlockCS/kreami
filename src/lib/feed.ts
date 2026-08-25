@@ -1,5 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import type { FollowRow, PublicProfile } from './profiles';
 import { supabase } from './supabase';
 
 export type FeedItem = {
@@ -124,6 +125,15 @@ export function useToggleLike() {
   });
 }
 
+/**
+ * Follow and unfollow. Optimistic like a like is: the button has to answer
+ * immediately or every row in a follower list feels broken.
+ *
+ * Note what is NOT invalidated afterwards — the follow list you are looking
+ * at. Unfollowing somebody from your own Following tab would make their row
+ * vanish under your thumb, which reads as "did I just delete them?". The row
+ * stays, showing Follow, until the list is opened afresh.
+ */
 export function useToggleFollow() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -133,12 +143,55 @@ export function useToggleFollow() {
       const row = Array.isArray(data) ? data[0] : data;
       return row as { following: boolean; follower_count: number };
     },
-    onSuccess: () => {
+    onMutate: async (profileId) => {
+      await queryClient.cancelQueries({ queryKey: ['follow-list'] });
+      const snapshots: [readonly unknown[], unknown][] = [];
+
+      for (const [key, value] of queryClient.getQueriesData<{ pages: FollowRow[][] }>({
+        queryKey: ['follow-list'],
+      })) {
+        if (!value) continue;
+        snapshots.push([key, value]);
+        queryClient.setQueryData(key, {
+          ...value,
+          pages: value.pages.map((page) => page.map((row) => flipFollow(row, profileId))),
+        });
+      }
+
+      for (const [key, value] of queryClient.getQueriesData<PublicProfile | null>({
+        queryKey: ['public-profile'],
+      })) {
+        if (!value || value.id !== profileId) continue;
+        snapshots.push([key, value]);
+        queryClient.setQueryData(key, flipFollow(value, profileId));
+      }
+
+      return { snapshots };
+    },
+    onError: (_err, _id, context) => {
+      for (const [key, value] of context?.snapshots ?? []) {
+        queryClient.setQueryData(key, value);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['home-feed'] });
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       queryClient.invalidateQueries({ queryKey: ['public-profile'] });
     },
   });
+}
+
+/** Flips one person's follow state and their follower count, or returns them untouched. */
+function flipFollow<T extends { id: string; is_following: boolean; follower_count: number }>(
+  person: T,
+  profileId: string,
+): T {
+  if (person.id !== profileId) return person;
+  return {
+    ...person,
+    is_following: !person.is_following,
+    follower_count: Math.max(0, person.follower_count + (person.is_following ? -1 : 1)),
+  };
 }
 
 /** Whether the signed-in user follows someone. Null while unknown. */

@@ -98,8 +98,9 @@ driving the real RPCs as ordinary signed-in users, cleaned up afterwards.
       tripped — testing them means burning the window, so it needs a dedicated run.
 - [ ] **`merge_experiences`.** Correctly unreachable by users; never actually run, even as
       admin. *Trigger: the first real duplicate.*
-- [ ] **Keyset pagination.** The `before` cursor has never been passed with enough rows to
-      page.
+- [ ] **Keyset pagination.** `e2e` now passes a `before` cursor to `profile_followers` and
+      asserts the row it points at is excluded, so the boundary is right — but no list has
+      ever held more than a page, so a real second page has still never been fetched.
 - [ ] **Counter drift under concurrency.** Only shows up under real load.
 
 ## Unverified — Phase 3
@@ -119,20 +120,21 @@ driving the real RPCs as ordinary signed-in users, cleaned up afterwards.
       experience outlives the person who first rated it — but it means zero-Kreami
       experiences accumulate. Related to Q4. *Trigger: when zero-Kreami experiences start
       showing up in search.*
-- [ ] **A second account.** The follow graph cannot be tested with one user —
+- [x] ~~**A second account.**~~ `npm run e2e` makes its own throwaway accounts and deletes
+      them again, which is what unblocked the follow-graph verification below. The original
+      note: the follow graph cannot be tested with one user —
       `toggle_follow` rejects self-follows by constraint, so following, follower counts and
       a home feed containing somebody else's Kreami are all unverifiable until a second
       account exists. Magic link is the cheapest way (any second email), but Supabase's
       built-in SMTP allows only a few per hour. *Trigger: before the feed UI can be
       verified at all — this gates the whole of Phase 3's verification.*
-- [ ] **Follow, like and reply round trips.** The toggles are idempotent and rate-limited,
-      but nothing has followed, liked or replied to anything yet. *Trigger: the moment the
-      feed UI exists.*
-- [ ] **Follow counters.** `follower_count` / `following_count` are trigger-maintained and
-      have never moved.
-- [ ] **Home feed against a real follow graph.** Verified only that it refuses anonymous
-      callers; it has never returned somebody else's Kreami.
-- [ ] **Keyset pagination.** The `before` cursor has never been passed.
+- [x] ~~Follow, like and reply round trips.~~ Covered by `npm run e2e`.
+- [x] ~~Follow counters.~~ They move, and `e2e` asserts it.
+- [x] ~~Home feed against a real follow graph.~~ Bob sees Alice's Kreami.
+- [x] ~~Follower and following lists.~~ `e2e` covers the two RPCs — per-viewer
+      `is_following`, `is_self`, the anonymous read and the cursor boundary — and the UI was
+      driven by hand against three throwaway accounts: both tabs, the row toggle, the empty
+      states, and your own row appearing without a Follow button.
 
 ## Not built yet
 

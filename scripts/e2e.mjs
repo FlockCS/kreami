@@ -226,6 +226,60 @@ try {
     feed.some((f) => f.user_id === bob.id),
   );
 
+  console.log('\nFollower and following lists\n');
+  r = await rpc(alice.token, 'profile_followers', { target: alice.id });
+  const aliceFollowers = Array.isArray(r.body) ? r.body : [];
+  const bobRow = aliceFollowers.find((p) => p.id === bob.id);
+  check("alice's followers contains bob", Boolean(bobRow), JSON.stringify(r.body).slice(0, 200));
+  check('the row carries a cursor', typeof bobRow?.followed_at === 'string');
+  check('alice does not follow bob back, and the row says so', bobRow?.is_following === false);
+  check('bob is not alice', bobRow?.is_self === false);
+
+  r = await rpc(bob.token, 'profile_following', { target: bob.id });
+  const bobFollowing = Array.isArray(r.body) ? r.body : [];
+  const aliceRow = bobFollowing.find((p) => p.id === alice.id);
+  check("bob's following contains alice", Boolean(aliceRow), JSON.stringify(r.body).slice(0, 200));
+  check('and it is marked as one bob follows', aliceRow?.is_following === true);
+
+  // Same list, viewed by the other person: is_following is per-viewer, so
+  // alice looking at her own follower list must not see herself as followed.
+  r = await rpc(alice.token, 'profile_following', { target: bob.id });
+  const asAlice = (Array.isArray(r.body) ? r.body : []).find((p) => p.id === alice.id);
+  check('is_following is per-viewer, not per-row', asAlice?.is_following === false);
+  check('and is_self is true when you appear in a list', asAlice?.is_self === true);
+
+  // The lists are the one profile surface a logged-out visitor lands on from
+  // a shared link, so they must work without a session.
+  r = await rpc(null, 'profile_followers', { target: alice.id });
+  const anon = Array.isArray(r.body) ? r.body : [];
+  check(
+    'anonymous visitors can read a follower list',
+    anon.some((p) => p.id === bob.id),
+  );
+  check(
+    'and follow nobody',
+    anon.every((p) => p.is_following === false && p.is_self === false),
+  );
+
+  // First real exercise of a keyset cursor: pointed at the only edge there is,
+  // the next page must be empty rather than repeating it.
+  r = await rpc(alice.token, 'profile_followers', {
+    target: alice.id,
+    before: bobRow?.followed_at,
+  });
+  check(
+    'the before cursor excludes the row it points at',
+    Array.isArray(r.body) && r.body.length === 0,
+    JSON.stringify(r.body).slice(0, 120),
+  );
+
+  r = await rpc(bob.token, 'profile_following', { target: alice.id });
+  check(
+    'alice follows nobody, so her following list is empty',
+    Array.isArray(r.body) && r.body.length === 0,
+    JSON.stringify(r.body).slice(0, 120),
+  );
+
   console.log('\nLikes, and replies staying closed\n');
   r = await rpc(bob.token, 'toggle_like', { target: edit.kreami_id });
   let like = Array.isArray(r.body) ? r.body[0] : r.body;

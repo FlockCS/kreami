@@ -106,6 +106,22 @@ is a soft touch or a hater, and it's worth surfacing prominently on the profile.
 Works, and is closed. Restoring it is one `grant execute … to authenticated` once user
 blocks exist. See [11 — Decisions](11-decisions-and-open-questions.md), D18.
 
+### `profile_followers(target uuid, before timestamptz, lim int)` / `profile_following(...)`
+Who follows somebody, and who they follow. Keyset-paginated on the edge's `created_at`,
+which each row returns as `followed_at`.
+
+Each row is a profile plus two viewer-relative booleans — `is_following` and `is_self` —
+computed in the same pass, so a screenful of people costs one request rather than one per
+row. Both are readable by `anon`, and for an anonymous caller both booleans are false.
+
+```ts
+Array<{
+  id: string, handle: string, display_name: string, bio: string | null,
+  avatar_url: string | null, follower_count: number, followed_at: string,
+  is_following: boolean, is_self: boolean
+}>
+```
+
 ### `toggle_follow(target uuid)` / `toggle_like(kreami uuid)`
 Idempotent toggles returning the new state and count. One call, no read-then-write race.
 

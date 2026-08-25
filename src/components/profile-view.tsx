@@ -9,6 +9,7 @@ import { LoadError } from '@/components/load-error';
 import { useToggleFollow } from '@/lib/feed';
 import {
   useProfileKreamis,
+  type FollowListKind,
   type ProfileKreami,
   type ProfileSort,
   type PublicProfile,
@@ -34,9 +35,18 @@ export function ProfileView({
   profile: PublicProfile;
   action?: React.ReactNode;
 }) {
+  const router = useRouter();
   const [sort, setSort] = useState<ProfileSort>('recent');
   const kreamis = useProfileKreamis(profile.id, sort);
   const follow = useToggleFollow();
+
+  // Both tabs of the same screen, including for your own profile: a list of
+  // other people reads the same whoever is looking at it.
+  const openFollows = (tab: FollowListKind) =>
+    router.push({
+      pathname: '/u/[handle]/follows',
+      params: { handle: profile.handle, tab },
+    });
 
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
@@ -57,8 +67,16 @@ export function ProfileView({
 
         <View className="mt-5 flex-row items-baseline gap-6">
           <Stat value={profile.kreami_count} label="KREAMIS" />
-          <Stat value={profile.follower_count} label="FOLLOWERS" />
-          <Stat value={profile.following_count} label="FOLLOWING" />
+          <Stat
+            value={profile.follower_count}
+            label="FOLLOWERS"
+            onPress={() => openFollows('followers')}
+          />
+          <Stat
+            value={profile.following_count}
+            label="FOLLOWING"
+            onPress={() => openFollows('following')}
+          />
         </View>
 
         <View
@@ -129,12 +147,30 @@ export function ProfileView({
   );
 }
 
-function Stat({ value, label }: { value: number; label: string }) {
-  return (
-    <View className="flex-row items-baseline gap-[6px]">
+/**
+ * A profile number. The Kreami count has nowhere to go — the list is already
+ * below it — so it stays inert; the two follow counts are the links into the
+ * follower and following lists.
+ */
+function Stat({ value, label, onPress }: { value: number; label: string; onPress?: () => void }) {
+  const body = (
+    <>
       <Text className="font-serif text-[22px] leading-none text-ink">{value.toLocaleString()}</Text>
       <Text className="font-sans text-[10px] tracking-tab text-muted">{label}</Text>
-    </View>
+    </>
+  );
+
+  if (!onPress) return <View className="flex-row items-baseline gap-[6px]">{body}</View>;
+
+  return (
+    <Pressable
+      accessibilityRole="link"
+      accessibilityLabel={`${value} ${label.toLowerCase()}`}
+      onPress={onPress}
+      className="flex-row items-baseline gap-[6px] py-1"
+    >
+      {body}
+    </Pressable>
   );
 }
 

@@ -106,7 +106,7 @@ something slightly different, and land in the same thread.
 - [x] **Empty-feed backfill** — the global feed inline when the following feed is thin
 - [x] Tab shell: Home, Discover, compose, You
 - [x] ~~Replies~~ — cut from v1 (D18). Schema and `post_reply()` kept, grant withdrawn.
-- [ ] Follower / following lists
+- [x] Follower / following lists, both tabs on one screen, with the row-level follow toggle
 
 **Done when:** two accounts can follow each other and see each other's Kreamis in Home.
 

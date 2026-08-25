@@ -523,6 +523,34 @@ export type Database = {
         }[]
       }
       post_reply: { Args: { body: string; target: string }; Returns: string }
+      profile_followers: {
+        Args: { before?: string; lim?: number; target: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          display_name: string
+          followed_at: string
+          follower_count: number
+          handle: string
+          id: string
+          is_following: boolean
+          is_self: boolean
+        }[]
+      }
+      profile_following: {
+        Args: { before?: string; lim?: number; target: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          display_name: string
+          followed_at: string
+          follower_count: number
+          handle: string
+          id: string
+          is_following: boolean
+          is_self: boolean
+        }[]
+      }
       profile_kreamis: {
         Args: { lim?: number; sort?: string; target: string }
         Returns: {

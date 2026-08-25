@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 
 import { useProfile } from './auth';
@@ -34,6 +34,47 @@ export type ProfileKreami = {
 };
 
 export type ProfileSort = 'recent' | 'highest' | 'lowest';
+
+export type FollowListKind = 'followers' | 'following';
+
+/** One person in a follower or following list. */
+export type FollowRow = {
+  id: string;
+  handle: string;
+  display_name: string;
+  bio: string | null;
+  avatar_url: string | null;
+  follower_count: number;
+  /** When the edge was created. Doubles as the keyset cursor. */
+  followed_at: string;
+  is_following: boolean;
+  is_self: boolean;
+};
+
+const FOLLOW_PAGE = 30;
+
+/**
+ * A follower or following list, keyset-paginated on the edge's created_at for
+ * the same reason the feeds are: a list somebody is scrolling must not shuffle
+ * or repeat when a new follow lands above them.
+ */
+export function useFollowList(kind: FollowListKind, profileId: string | undefined) {
+  return useInfiniteQuery({
+    queryKey: ['follow-list', kind, profileId],
+    enabled: Boolean(profileId),
+    initialPageParam: null as string | null,
+    queryFn: async ({ pageParam }): Promise<FollowRow[]> => {
+      const { data, error } = await supabase.rpc(
+        kind === 'followers' ? 'profile_followers' : 'profile_following',
+        { target: profileId!, before: pageParam ?? undefined, lim: FOLLOW_PAGE },
+      );
+      if (error) throw new Error(error.message);
+      return (data ?? []) as FollowRow[];
+    },
+    getNextPageParam: (last: FollowRow[]) =>
+      last.length < FOLLOW_PAGE ? undefined : (last[last.length - 1]?.followed_at ?? undefined),
+  });
+}
 
 export function usePublicProfile(handle: string | undefined) {
   return useQuery({
