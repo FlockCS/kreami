@@ -70,7 +70,9 @@ somebody else signs up.
       job exists for any other reason, or the bucket stops being nearly empty.*
 - [ ] **Avatar upload is only exercised on web.** The picker was driven through the DOM in
       the browser; `allowsEditing`, the iOS/Android crop UI, and the photo-library
-      permission prompt have never run on a device. *Trigger: first native build.*
+      permission prompt have never run on a device. The HEIC path in particular is
+      *expected* to be dead code on native — the OS decodes it — but "expected" is not
+      "seen". *Trigger: first native build.*
 
 - [ ] **Decide on a test runner.** Node runs TypeScript directly, which covers one pure
       module, but Phase 1 has real logic worth testing (handle validation, session restore,

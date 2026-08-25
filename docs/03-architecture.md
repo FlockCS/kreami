@@ -113,7 +113,7 @@ building that Worker sooner than feels necessary.
 | Supabase DB | 500 MB | ~2M Kreamis. Not your problem for a long time. |
 | Supabase egress | 5 GB/month | The first real limit. Feed queries are chatty — select narrow columns, paginate hard. |
 | Supabase MAU | 50,000 | Not your problem. |
-| Supabase Storage | 1 GB | Avatars only. Cap at 256×256 and it's effectively unlimited. |
+| Supabase Storage | 1 GB | Avatars only. Cap at 256×256 and it's effectively unlimited. Uploads are cropped and resized on the client, so nothing large is ever sent. |
 | Cloudflare Pages | Unlimited bandwidth, 500 builds/mo | Not your problem. |
 | Resend | 3,000 emails/mo, 100/day | ~100 new-user magic links per day. Fine. |
 | GitHub Actions | 2,000 min/mo (free on public repos) | Not your problem. |

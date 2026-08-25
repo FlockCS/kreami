@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 
+import { decodeHeic } from './heic';
 import { supabase } from './supabase';
 
 /**
@@ -33,18 +34,42 @@ export async function pickAvatar(): Promise<string | null> {
   if (result.canceled || !result.assets?.[0]) return null;
   const asset = result.assets[0];
 
+  // An iPhone photo is HEIC unless its owner has changed a setting they have
+  // never heard of, so this is the common case, not the exotic one.
+  //
+  // A zero dimension is the signal. The picker sizes an image by loading it,
+  // and reports 0x0 for anything the platform could not read — which is
+  // precisely when a decoder of our own is worth reaching for, and only then.
+  // Native never gets here (the OS reads HEIC), and neither does Safari (it
+  // reads HEIC too), so neither downloads three megabytes to be told what they
+  // already knew.
+  const unreadableHere = !asset.width || !asset.height;
+  const decoded = unreadableHere ? await decodeHeic(asset.uri) : null;
+
+  const uri = decoded?.uri ?? asset.uri;
+  const width = decoded?.width ?? asset.width;
+  const height = decoded?.height ?? asset.height;
+
   // Crop to a centred square BEFORE resizing. Resizing a 600x400 photo
   // straight to 256x256 does not crop it, it squashes it — faces go wide and
   // circles go oval. Native asks for a square crop up front and this is then a
   // no-op; web has no editing step at all, so this is the only thing standing
   // between a landscape photo and a distorted avatar.
-  const side = Math.min(asset.width, asset.height);
+  // Still unsized means nothing here can read it: a corrupt file, or a format
+  // this browser does not know and the HEIC decoder does not cover. Worth
+  // catching explicitly, because cropping against zero produces a zero-sized
+  // rectangle and then a failure much further down.
+  if (!width || !height) {
+    throw new Error(unreadable(asset.fileName ?? asset.mimeType ?? ''));
+  }
+
+  const side = Math.min(width, height);
 
   try {
-    const context = ImageManipulator.manipulate(asset.uri);
+    const context = ImageManipulator.manipulate(uri);
     context.crop({
-      originX: Math.round((asset.width - side) / 2),
-      originY: Math.round((asset.height - side) / 2),
+      originX: Math.round((width - side) / 2),
+      originY: Math.round((height - side) / 2),
       width: side,
       height: side,
     });
@@ -55,6 +80,10 @@ export async function pickAvatar(): Promise<string | null> {
     return image.uri;
   } catch (cause) {
     throw new Error(unreadable(asset.fileName ?? asset.mimeType ?? ''), { cause });
+  } finally {
+    // The decoder's intermediate JPEG has been read by now; without this it
+    // stays in memory for the life of the tab.
+    if (decoded) URL.revokeObjectURL(decoded.uri);
   }
 }
 
@@ -71,11 +100,10 @@ export async function pickAvatar(): Promise<string | null> {
  */
 function unreadable(nameOrType: string): string {
   if (/heic|heif/i.test(nameOrType)) {
-    return (
-      'This browser cannot read HEIC photos, which is the format iPhones use by default. ' +
-      'Pick a JPEG or PNG, or set Settings → Camera → Formats → Most Compatible on your ' +
-      'phone and take a new one.'
-    );
+    // Reaching this means the HEIC decoder ran and still could not read it —
+    // a truncated file, or a container variant libheif does not cover — so the
+    // advice is about this photo, not about the format.
+    return 'That photo could not be read. It may be damaged — try another one.';
   }
   return 'That image could not be opened. Try a different photo, or a JPEG or PNG.';
 }

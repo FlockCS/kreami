@@ -13,7 +13,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck && npm run lint && npm run format:check && npm run verify:storage",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run verify:storage && npm run verify:heic",
     "db:start": "supabase start",
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
@@ -24,7 +24,8 @@
     "verify:storage": "node scripts/verify-chunked-storage.ts",
     "smoke": "node scripts/smoke.mjs",
     "test:account": "node scripts/test-account.mjs",
-    "e2e": "node scripts/e2e.mjs"
+    "e2e": "node scripts/e2e.mjs",
+    "verify:heic": "node scripts/verify-heic-sniff.ts"
   },
   "dependencies": {
     "@expo-google-fonts/archivo": "^0.4.2",
@@ -44,6 +45,7 @@
     "expo-status-bar": "~57.0.1",
     "expo-system-ui": "~57.0.2",
     "expo-web-browser": "~57.0.2",
+    "heic-to": "^1.5.2",
     "nativewind": "^4.2.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
