@@ -4,6 +4,7 @@ import { Pressable, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
+import { GoogleButton } from '@/components/google-button';
 import { signInWithEmail, signInWithGoogle } from '@/lib/auth';
 import { colors } from '@/theme/tokens';
 
@@ -68,8 +69,7 @@ export default function SignIn() {
           </View>
         ) : (
           <View className="mt-8">
-            <Button
-              label="Continue with Google"
+            <GoogleButton
               loading={google.isPending}
               disabled={busy}
               onPress={() => google.mutate()}

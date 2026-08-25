@@ -23,6 +23,13 @@ somebody else signs up.
       (docs/11 Q1)
 - [ ] **App icon.** Still the Expo logo, in `assets/`. *Trigger: before anything is shared
       or installed.*
+- [ ] **Google consent screen shows the raw Supabase project ref.** Users see
+      "Sign in to qfyzihgtxjpcgooohmuw.supabase.co", which reads like a phishing page. The
+      string is the host of the OAuth *redirect URI*, so setting the app name in Google
+      Cloud does not change it. Two fixes: move to Google Identity Services +
+      `signInWithIdToken`, so the browser never leaves our origin (free, more client code);
+      or a Supabase custom domain, which needs a **paid plan plus the add-on**. *Trigger:
+      before anyone but you signs in — this is a trust problem, not a polish one.*
 - [ ] **Seed 50–100 topics.** An empty rating app is unusable; the first ten users need
       threads to join or they each create a lonely topic and leave. *Trigger: before the
       private beta.* (docs/10 Phase 5)
