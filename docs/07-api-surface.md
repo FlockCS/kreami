@@ -11,17 +11,18 @@ should have been one RPC.
 
 ## RPC catalog
 
-### `resolve_topic(raw_title text)`
-Resolves free-form text to a Topic. The heart of the compose flow — see
-[05 — Topic Matching](05-topic-matching.md).
+### `resolve_topic(raw_title text)` — **internal, not callable by clients**
+Resolves free-form text to a Topic, creating one when nothing matches exactly, and writes a
+row to `topic_resolution_log`. Granted to nobody; only `post_kreami()` calls it.
 
-```ts
-{ topic_id: string, matched_title: string, is_new: boolean }
-```
+The reason it is not exposed: calling it is what *creates* a topic, so a client that resolved
+in order to preview would leave a zero-Kreami topic behind every time someone changed their
+mind. See [05 — Topic Matching](05-topic-matching.md).
 
-Exact normalized match on a live Topic or a known alias → join it. Otherwise a Topic is
-created and `is_new` is `true`. Either way the client proceeds straight to the rating step:
-there is no confirmation branch to handle.
+### `get_topic_by_slug(s text)` → `setof topics`
+Returns the Topic for a slug, transparently following `merged_into_topic_id` so old shared
+links keep working. Returns **no row** for an unknown slug — deliberately `setof` rather than
+a composite, which would have come back as an object with every field null.
 
 ### `search_topics(q text, lim int)`
 Autocomplete. Called on every keystroke (debounced 250 ms). Must stay under ~50 ms.

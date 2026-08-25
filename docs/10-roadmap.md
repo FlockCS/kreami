@@ -73,13 +73,14 @@ close the app, reopen it, and still be signed in.
 
 The heart of the product. If you build only this, you have something worth showing.
 
-- [ ] `topics`, `topic_aliases`, `kreamis` tables with indexes and RLS
-- [ ] `normalize_topic_title()`, `create_topic()`, `resolve_topic()`
-- [ ] `search_topics()` with the trigram index
-- [ ] `post_kreami()` with rate limiting
-- [ ] Counter triggers + `recompute_topic_aggregates()`
-- [ ] **`topic_resolution_log` writing from day one** — it is the evidence that decides
+- [x] `topics`, `topic_aliases`, `kreamis` tables with indexes and RLS
+- [x] `normalize_topic_title()`, `slugify()`, `create_topic()`, `resolve_topic()` (internal)
+- [x] `search_topics()` with the trigram index, `get_topic_by_slug()`, `topic_distribution()`
+- [x] `post_kreami()` with rate limiting, and `merge_topics()`
+- [x] Counter triggers + `recompute_topic_aggregates()`
+- [x] **`topic_resolution_log` writing from day one** — it is the evidence that decides
       whether the exact-match rule survives the beta
+- [x] Web layout constrained to a centred column
 - [ ] `KreamRating` component: display and input, with 0 visually distinct from unrated
 - [ ] Compose flow: text → live search → resolve → rate → post (two steps, no confirmation)
 - [ ] Topic thread screen with histogram and sort tabs

@@ -10,6 +10,7 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, type ReactNode } from 'react';
+import { Platform, View } from 'react-native';
 
 import '../global.css';
 
@@ -18,6 +19,12 @@ import { queryClient } from '@/lib/query-client';
 import { colors, fonts } from '@/theme/tokens';
 
 SplashScreen.preventAutoHideAsync();
+
+/**
+ * The web column. Wide enough for a 150-character note to breathe, narrow
+ * enough that the mockups' proportions still hold.
+ */
+const COLUMN_WIDTH = 480;
 
 /**
  * Sends people where they belong, and — just as importantly — does nothing
@@ -79,15 +86,36 @@ function Root() {
   return (
     <AuthGate>
       <StatusBar style="dark" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.paper },
-          headerStyle: { backgroundColor: colors.paper },
-          headerTitleStyle: { fontFamily: fonts.serif, color: colors.ink },
-          headerTintColor: colors.ink,
-        }}
-      />
+      {/*
+        Kreami is a phone app that also runs in a browser. Letting a feed
+        stretch to 2000px turns every card into a wide band of whitespace with
+        a sentence lost in it, so on web the app is held to a single centred
+        column and the hairlines give it an edge. On native this is a plain
+        passthrough — the constraint would otherwise letterbox tablets.
+      */}
+      <View style={{ flex: 1, backgroundColor: colors.paper, alignItems: 'center' }}>
+        <View
+          style={[
+            { flex: 1, width: '100%' },
+            Platform.OS === 'web' && {
+              maxWidth: COLUMN_WIDTH,
+              borderLeftWidth: 1,
+              borderRightWidth: 1,
+              borderColor: colors.rule,
+            },
+          ]}
+        >
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.paper },
+              headerStyle: { backgroundColor: colors.paper },
+              headerTitleStyle: { fontFamily: fonts.serif, color: colors.ink },
+              headerTintColor: colors.ink,
+            }}
+          />
+        </View>
+      </View>
     </AuthGate>
   );
 }

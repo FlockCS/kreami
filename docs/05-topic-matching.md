@@ -128,6 +128,12 @@ attractive than typing.
 
 ## Resolution at submit
 
+**`resolve_topic()` is internal.** It is granted to nobody and only `post_kreami()` calls it.
+If the client could call it directly, merely *previewing* a title would create a topic with
+zero Kreamis — exactly the lonely-topic pollution this whole design exists to prevent. A
+topic should never exist without at least one rating on it, and making the function
+unreachable is what guarantees that rather than hoping the client behaves.
+
 ```sql
 create or replace function resolve_topic(raw_title text)
 returns table (topic_id uuid, matched_title text, is_new boolean)

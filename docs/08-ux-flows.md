@@ -208,6 +208,16 @@ metric. Make that the last screen's primary action.
 The search empty state is a **conversion opportunity, not an apology**. "Be first" is the
 right emotional frame for a rating app.
 
+## The web column
+
+Kreami is a phone app that also runs in a browser. A feed allowed to stretch to 2000px turns
+every card into a wide band of whitespace with one sentence lost in the middle of it, so on
+web the whole app is held to a **480px centred column** with hairline edges. Native is
+unconstrained — applying it there would letterbox tablets.
+
+480px is wide enough for a 150-character note to breathe and narrow enough that the
+proportions in the design canvas still hold.
+
 ## Implementation notes
 
 **Never pass Pressable's function `style` alongside `className`.** NativeWind takes over the
