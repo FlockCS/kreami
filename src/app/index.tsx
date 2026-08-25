@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 import { Alert, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -13,6 +14,7 @@ import { colors } from '@/theme/tokens';
  * The home feed replaces this in Phase 3 — see docs/10-roadmap.md.
  */
 export default function Home() {
+  const router = useRouter();
   const { session } = useSession();
   const profile = useProfile();
 
@@ -70,8 +72,12 @@ export default function Home() {
         </View>
 
         <Text className="mt-7 font-sans text-[15px] leading-6 text-body">
-          Identity works. The feed, the compose flow and topic threads arrive in Phases 2 and 3.
+          The feed lands in Phase 3. Until then, this is the way in to the core loop.
         </Text>
+
+        <View className="mt-6">
+          <Button label="Leave a Kreami" onPress={() => router.push('/compose')} />
+        </View>
 
         <View className="mt-8">
           <Button

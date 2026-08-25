@@ -57,7 +57,7 @@ export const fonts = {
 export const tracking = {
   /** 0.18em at 10px — section labels. */
   label: 1.8,
-  /** 0.12em at 10px — topic average and count. */
+  /** 0.12em at 10px — experience average and count. */
   meta: 1.2,
   /** 0.14em at 11px — sort tabs. */
   tab: 1.5,
@@ -67,7 +67,7 @@ export const tracking = {
 export const KREAM_MIN = 0;
 export const KREAM_MAX = 5;
 
-/** Below this many Kreamis a Topic shows no average. See docs/02-domain-model.md. */
+/** Below this many Kreamis an Experience shows no average. See docs/02-domain-model.md. */
 export const MIN_KREAMIS_FOR_AVERAGE = 3;
 
 export type Colors = typeof colors;

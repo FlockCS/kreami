@@ -32,7 +32,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "topic_aliases_topic_id_fkey"
+            foreignKeyName: "experience_aliases_experience_id_fkey"
             columns: ["experience_id"]
             isOneToOne: false
             referencedRelation: "experiences"
@@ -70,14 +70,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "topic_resolution_log_matched_topic_id_fkey"
+            foreignKeyName: "experience_resolution_log_matched_experience_id_fkey"
             columns: ["matched_experience_id"]
             isOneToOne: false
             referencedRelation: "experiences"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "topic_resolution_log_user_id_fkey"
+            foreignKeyName: "experience_resolution_log_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -124,14 +124,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "topics_created_by_fkey"
+            foreignKeyName: "experiences_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "topics_merged_into_topic_id_fkey"
+            foreignKeyName: "experiences_merged_into_experience_id_fkey"
             columns: ["merged_into_experience_id"]
             isOneToOne: false
             referencedRelation: "experiences"
@@ -178,7 +178,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "kreamis_topic_id_fkey"
+            foreignKeyName: "kreamis_experience_id_fkey"
             columns: ["experience_id"]
             isOneToOne: false
             referencedRelation: "experiences"
