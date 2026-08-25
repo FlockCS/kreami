@@ -25,7 +25,8 @@
     "smoke": "node scripts/smoke.mjs",
     "test:account": "node scripts/test-account.mjs",
     "e2e": "node scripts/e2e.mjs",
-    "verify:heic": "node scripts/verify-heic-sniff.ts"
+    "verify:heic": "node scripts/verify-heic-sniff.ts",
+    "verify:security": "node scripts/verify-security.mjs"
   },
   "dependencies": {
     "@expo-google-fonts/archivo": "^0.4.2",

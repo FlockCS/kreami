@@ -91,11 +91,11 @@ somebody else signs up.
 - [ ] **Decide on a test runner.** Node runs TypeScript directly, which covers one pure
       module, but Phase 1 has real logic worth testing (handle validation, session restore,
       deep-link parsing). Vitest is ~5 minutes. *Trigger: the next non-trivial pure module.*
-- [ ] **Nightly counter reconciliation.** Trigger-maintained counters drift under concurrent
-      load. Recompute from source and log discrepancies. *Trigger: when counters exist —
-      Phase 3.* (docs/04)
-- [ ] **Nightly duplicate-candidate report.** The only repair mechanism the exact-match rule
-      has. *Trigger: Phase 5.* (docs/05)
+- [ ] **Sign-in does not preserve intent.** docs/08 says tapping "Leave a Kreami" as a
+      logged-out visitor should return you to that exact thread afterwards. It currently
+      lands you on the pitch and then the feed — nothing breaks, but the thread you were
+      reading is gone. Needs the destination carried through the OAuth round trip, which
+      means persisting it, since web reloads the page. *Trigger: before the private beta.*
 - [ ] **Pin Node to 22.** Local is on Node 25, which Expo does not test against. Works
       today; CI is already pinned. *Trigger: the first inexplicable Metro or Babel error.*
 - [ ] **`<title>` on web routes.** Every page currently renders an empty browser tab.

@@ -143,6 +143,25 @@ export function ProfileView({
         ) : (
           kreamis.data?.map((k) => <ProfileKreamiRow key={k.kreami_id} kreami={k} />)
         )}
+
+        {/* Your own profile does not need a way to report you. */}
+        {profile.is_self ? null : (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Report ${profile.display_name}`}
+            onPress={() =>
+              router.push({
+                pathname: '/report',
+                params: { kind: 'user', id: profile.id, subject: `@${profile.handle}` },
+              })
+            }
+            className="mt-6 min-h-11 justify-center"
+          >
+            <Text className="font-sans text-[10px] tracking-meta text-muted">
+              REPORT THIS ACCOUNT
+            </Text>
+          </Pressable>
+        )}
       </View>
     </ScrollView>
   );

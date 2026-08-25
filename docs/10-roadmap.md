@@ -133,15 +133,19 @@ something slightly different, and land in the same thread.
 
 ## Phase 5 — Launch readiness (3–4 sessions)
 
-- [ ] Onboarding: 4 screens, ending in "leave your first Kreami"
-- [ ] Report flow + `reports` table
-- [ ] Admin SQL views: report queue, duplicate candidates, resolution-log stats
-- [ ] `merge_experiences()` + nightly duplicate-candidate report
-- [ ] Nightly counter reconciliation
-- [ ] **OpenGraph Worker** for `/e/:slug` and `/u/:handle` — link previews
-- [ ] Sentry
-- [ ] Full [security checklist](09-security-moderation.md#pre-launch-checklist)
-- [ ] Seed 50–100 Experiences yourself so the app isn't empty on day one
+- [x] Onboarding: 4 screens, ending in "leave your first Kreami"
+- [x] Report flow + `reports` table
+- [x] Admin SQL views: report queue, duplicate candidates, matching stats
+- [x] `merge_experiences()` + duplicate-candidate report (`admin_duplicate_candidates`)
+- [x] Nightly counter reconciliation, plus rate-limit pruning, in `nightly.yml`
+- [x] **Anonymous browsing** — the funnel the RLS policies were always written for. Not on
+      the original list because nobody noticed the route guard was closing the door on it.
+- [ ] **OpenGraph Worker** for `/e/:slug` and `/u/:handle` — needs the Cloudflare project
+- [ ] **Sentry** — needs an account and a DSN
+- [x] Mechanical half of the [security checklist](09-security-moderation.md#pre-launch-checklist),
+      as `npm run verify:security`. The human half — SMTP on a real phone, secrets placement,
+      crons observed running — is still yours.
+- [ ] **Seed 50–100 Experiences** — your call on what they are (docs/11 Q7)
 
 **Done when:** the checklist passes and a shared link renders a real preview card.
 

@@ -229,13 +229,25 @@ becomes the top priority — ahead of any feature on the roadmap.
 
 ## Pre-launch checklist
 
-- [ ] RLS enabled on every table; the CI check above passes
-- [ ] Every `security definer` function has `search_path` set and `execute` revoked from public
-- [ ] Service role key exists only in GitHub Actions secrets
-- [ ] Rate limits active on all six actions
-- [ ] Custom SMTP configured and a magic link tested end-to-end on a real phone
-- [ ] Account deletion tested end-to-end
-- [ ] Anonymous read verified working on `/e/:slug` in a logged-out browser
-- [ ] Anonymous *write* verified **blocked** on every table
-- [ ] Nightly counter reconciliation job running
-- [ ] Supabase keepalive cron running
+Everything marked automated is asserted by `npm run verify:security`, which reads the
+catalogue as `service_role` and then tries the writes for real with the anon key — being
+told no is not the same as being told it would be told no.
+
+- [x] RLS enabled on every table — *automated*
+- [x] Every `security definer` function has `search_path` set and `execute` revoked from
+      public — *automated*. The trigger functions were the ones still open: nobody calls
+      them, which is true and was not a reason.
+- [ ] Service role key exists only in GitHub Actions secrets — **yours**, and note it is
+      also in `.env.local` for the local scripts
+- [x] Rate limits active on all six actions — `post`, `create_experience`, `follow`, `like`,
+      `reply`, `report`
+- [ ] Custom SMTP configured and a magic link tested end-to-end on a real phone — **yours**
+- [x] Account deletion tested end-to-end — asserted in `npm run e2e`, including that it
+      takes the avatar with it
+- [x] Anonymous read verified working on `/e/:slug` in a logged-out browser — *automated*,
+      and verified by hand in a browser with no session
+- [x] Anonymous *write* verified **blocked** on every table — *automated*, one real POST
+      per table
+- [x] Nightly counter reconciliation job running — `nightly.yml`, though it has never fired
+      against production because production does not exist yet
+- [x] Supabase keepalive cron running — `keepalive.yml`, same caveat

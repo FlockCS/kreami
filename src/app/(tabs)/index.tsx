@@ -1,11 +1,11 @@
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, FlatList, RefreshControl, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { KreamiCard } from '@/components/kreami-card';
 import { LoadError } from '@/components/load-error';
-import { useProfile } from '@/lib/auth';
+import { useProfile, useSession } from '@/lib/auth';
 import { useGlobalFeed, useHomeFeed, useToggleLike, type FeedItem } from '@/lib/feed';
 import { colors } from '@/theme/tokens';
 
@@ -18,12 +18,18 @@ import { colors } from '@/theme/tokens';
  * showing an empty state. See docs/06-feeds-and-social.md.
  */
 export default function Home() {
+  const router = useRouter();
+  const { session } = useSession();
   const profile = useProfile();
-  const home = useHomeFeed();
+
+  // home_feed() is granted to authenticated only — it is defined in terms of
+  // auth.uid(). A signed-out visitor gets the global feed, which is the
+  // funnel: a shared link lands them here and they see the app working.
+  const home = useHomeFeed(Boolean(session));
   const toggleLike = useToggleLike();
 
-  const homeItems = home.data?.pages.flat() ?? [];
-  const thin = !home.isPending && homeItems.length < 5;
+  const homeItems = session ? (home.data?.pages.flat() ?? []) : [];
+  const thin = !session || (!home.isPending && homeItems.length < 5);
 
   // Only fetched when the following feed cannot carry the screen on its own.
   const global = useGlobalFeed(thin);
@@ -41,9 +47,21 @@ export default function Home() {
     >
       <View className="flex-row items-baseline justify-between px-6 pb-3 pt-4">
         <Text className="font-serif text-[30px] leading-none text-ink">Kreami</Text>
-        <Text className="font-sans text-[10px] tracking-label text-muted">
-          {following > 0 ? 'FOLLOWING' : 'EVERYONE'}
-        </Text>
+        {session ? (
+          <Text className="font-sans text-[10px] tracking-label text-muted">
+            {following > 0 ? 'FOLLOWING' : 'EVERYONE'}
+          </Text>
+        ) : (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push('/intro')}
+            className="min-h-11 justify-center"
+          >
+            <Text className="font-sans-semibold text-[13px]" style={{ color: colors.accent }}>
+              Sign in
+            </Text>
+          </Pressable>
+        )}
       </View>
       <View className="mx-6 h-px bg-ink" />
 
@@ -51,7 +69,7 @@ export default function Home() {
         <View className="px-6">
           <LoadError error={home.error} onRetry={() => home.refetch()} />
         </View>
-      ) : home.isPending ? (
+      ) : session && home.isPending ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color={colors.muted} />
         </View>
@@ -60,7 +78,10 @@ export default function Home() {
           data={[...homeItems, ...(thin ? globalItems : [])]}
           keyExtractor={(item: FeedItem) => item.kreami_id}
           renderItem={({ item }) => (
-            <KreamiCard item={item} onToggleLike={(id) => toggleLike.mutate(id)} />
+            <KreamiCard
+              item={item}
+              onToggleLike={(id) => (session ? toggleLike.mutate(id) : router.push('/intro'))}
+            />
           )}
           contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 32 }}
           refreshControl={
@@ -82,7 +103,9 @@ export default function Home() {
             }
           }}
           ListHeaderComponent={
-            thin ? <ThinFeedNotice hasAny={homeItems.length > 0} following={following} /> : null
+            thin && session ? (
+              <ThinFeedNotice hasAny={homeItems.length > 0} following={following} />
+            ) : null
           }
           ListEmptyComponent={<NothingYet />}
           ListFooterComponent={

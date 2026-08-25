@@ -1,0 +1,42 @@
+name: Nightly maintenance
+
+# Counter reconciliation, rate-limit pruning, and a count of what is waiting in
+# the moderation and duplicate queues. See nightly_maintenance() in
+# supabase/migrations/20260825200000_nightly_maintenance.sql.
+#
+# Not pg_cron: it is not available on the free tier, and the keepalive already
+# established GitHub Actions as where this project's scheduled work runs. One
+# mechanism beats two.
+#
+# This one needs the SERVICE ROLE key, unlike the keepalive — reconciliation
+# rewrites counters that no client may touch (D16), so there is no anon-safe
+# way to do it. That key must exist only in GitHub Actions secrets (docs/09).
+#
+# The output is the point. A clean night is a wall of zeros; a number in
+# counter_drift means a trigger is wrong and wants looking at.
+
+on:
+  schedule:
+    - cron: '41 4 * * *'
+  workflow_dispatch:
+
+jobs:
+  maintain:
+    name: Reconcile and prune
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run nightly_maintenance on production
+        env:
+          URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ -z "$URL" ] || [ -z "$KEY" ]; then
+            echo "production not configured; skipping"; exit 0
+          fi
+          body=$(curl -sS -X POST "${URL%/}/rest/v1/rpc/nightly_maintenance" \
+            -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
+            -H "Content-Type: application/json" -d '{}' \
+            -w '\n%{http_code}')
+          code=$(echo "$body" | tail -1)
+          echo "$body" | head -n -1
+          [ "$code" = "200" ] || { echo "failed with $code"; exit 1; }

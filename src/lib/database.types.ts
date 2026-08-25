@@ -35,6 +35,20 @@ export type Database = {
             foreignKeyName: "experience_aliases_experience_id_fkey"
             columns: ["experience_id"]
             isOneToOne: false
+            referencedRelation: "admin_duplicate_candidates"
+            referencedColumns: ["loser_id"]
+          },
+          {
+            foreignKeyName: "experience_aliases_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "admin_duplicate_candidates"
+            referencedColumns: ["winner_id"]
+          },
+          {
+            foreignKeyName: "experience_aliases_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
             referencedRelation: "experiences"
             referencedColumns: ["id"]
           },
@@ -69,6 +83,20 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "experience_resolution_log_matched_experience_id_fkey"
+            columns: ["matched_experience_id"]
+            isOneToOne: false
+            referencedRelation: "admin_duplicate_candidates"
+            referencedColumns: ["loser_id"]
+          },
+          {
+            foreignKeyName: "experience_resolution_log_matched_experience_id_fkey"
+            columns: ["matched_experience_id"]
+            isOneToOne: false
+            referencedRelation: "admin_duplicate_candidates"
+            referencedColumns: ["winner_id"]
+          },
           {
             foreignKeyName: "experience_resolution_log_matched_experience_id_fkey"
             columns: ["matched_experience_id"]
@@ -129,6 +157,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiences_merged_into_experience_id_fkey"
+            columns: ["merged_into_experience_id"]
+            isOneToOne: false
+            referencedRelation: "admin_duplicate_candidates"
+            referencedColumns: ["loser_id"]
+          },
+          {
+            foreignKeyName: "experiences_merged_into_experience_id_fkey"
+            columns: ["merged_into_experience_id"]
+            isOneToOne: false
+            referencedRelation: "admin_duplicate_candidates"
+            referencedColumns: ["winner_id"]
           },
           {
             foreignKeyName: "experiences_merged_into_experience_id_fkey"
@@ -210,6 +252,20 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "kreamis_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "admin_duplicate_candidates"
+            referencedColumns: ["loser_id"]
+          },
+          {
+            foreignKeyName: "kreamis_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "admin_duplicate_candidates"
+            referencedColumns: ["winner_id"]
+          },
           {
             foreignKeyName: "kreamis_experience_id_fkey"
             columns: ["experience_id"]
@@ -297,6 +353,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "admin_duplicate_candidates"
+            referencedColumns: ["loser_id"]
+          },
+          {
+            foreignKeyName: "notifications_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "admin_duplicate_candidates"
+            referencedColumns: ["winner_id"]
           },
           {
             foreignKeyName: "notifications_experience_id_fkey"
@@ -434,6 +504,98 @@ export type Database = {
           },
         ]
       }
+      reports: {
+        Row: {
+          created_at: string
+          detail: string | null
+          experience_id: string | null
+          id: string
+          kreami_id: string | null
+          reason: Database["public"]["Enums"]["report_reason"]
+          reply_id: string | null
+          reporter_id: string
+          resolution: string | null
+          resolved_at: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          experience_id?: string | null
+          id?: string
+          kreami_id?: string | null
+          reason: Database["public"]["Enums"]["report_reason"]
+          reply_id?: string | null
+          reporter_id: string
+          resolution?: string | null
+          resolved_at?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          experience_id?: string | null
+          id?: string
+          kreami_id?: string | null
+          reason?: Database["public"]["Enums"]["report_reason"]
+          reply_id?: string | null
+          reporter_id?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "admin_duplicate_candidates"
+            referencedColumns: ["loser_id"]
+          },
+          {
+            foreignKeyName: "reports_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "admin_duplicate_candidates"
+            referencedColumns: ["winner_id"]
+          },
+          {
+            foreignKeyName: "reports_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_kreami_id_fkey"
+            columns: ["kreami_id"]
+            isOneToOne: false
+            referencedRelation: "kreamis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_reply_id_fkey"
+            columns: ["reply_id"]
+            isOneToOne: false
+            referencedRelation: "replies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reserved_handles: {
         Row: {
           created_at: string
@@ -486,7 +648,74 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admin_duplicate_candidates: {
+        Row: {
+          loser_id: string | null
+          loser_kreamis: number | null
+          loser_title: string | null
+          score: number | null
+          winner_id: string | null
+          winner_kreamis: number | null
+          winner_title: string | null
+        }
+        Relationships: []
+      }
+      admin_matching_stats: {
+        Row: {
+          experiences: number | null
+          kreamis: number | null
+          mean_kreamis_per_experience: number | null
+          median_kreamis_per_experience: number | null
+          share_resolving_to_new: number | null
+          singletons: number | null
+        }
+        Relationships: []
+      }
+      admin_report_queue: {
+        Row: {
+          already_actioned: boolean | null
+          created_at: string | null
+          detail: string | null
+          experience_id: string | null
+          id: string | null
+          kreami_id: string | null
+          reason: Database["public"]["Enums"]["report_reason"] | null
+          reported_by: string | null
+          target: string | null
+          target_kind: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "admin_duplicate_candidates"
+            referencedColumns: ["loser_id"]
+          },
+          {
+            foreignKeyName: "reports_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "admin_duplicate_candidates"
+            referencedColumns: ["winner_id"]
+          },
+          {
+            foreignKeyName: "reports_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_kreami_id_fkey"
+            columns: ["kreami_id"]
+            isOneToOne: false
+            referencedRelation: "kreamis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       active_experiences: {
@@ -623,6 +852,13 @@ export type Database = {
         Args: { loser: string; winner: string }
         Returns: undefined
       }
+      nightly_maintenance: {
+        Args: never
+        Returns: {
+          detail: string
+          task: string
+        }[]
+      }
       normalize_experience_title: { Args: { raw: string }; Returns: string }
       post_kreami: {
         Args: { note?: string; rating: number; raw_title: string }
@@ -698,6 +934,13 @@ export type Database = {
         Args: { target: string }
         Returns: undefined
       }
+      reconcile_counters: {
+        Args: never
+        Returns: {
+          counter: string
+          rows_fixed: number
+        }[]
+      }
       resolve_experience: {
         Args: { raw_title: string }
         Returns: {
@@ -731,6 +974,16 @@ export type Database = {
         }[]
       }
       slugify: { Args: { raw: string }; Returns: string }
+      submit_report: {
+        Args: {
+          detail?: string
+          experience?: string
+          kreami?: string
+          reason: Database["public"]["Enums"]["report_reason"]
+          target_user?: string
+        }
+        Returns: string
+      }
       suggested_profiles: {
         Args: { lim?: number }
         Returns: {
@@ -766,6 +1019,14 @@ export type Database = {
         | "kreami_liked"
         | "kreami_replied"
         | "experience_activity"
+      report_reason:
+        | "spam"
+        | "harassment"
+        | "hate"
+        | "sexual"
+        | "violence"
+        | "duplicate_experience"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -898,6 +1159,15 @@ export const Constants = {
         "kreami_liked",
         "kreami_replied",
         "experience_activity",
+      ],
+      report_reason: [
+        "spam",
+        "harassment",
+        "hate",
+        "sexual",
+        "violence",
+        "duplicate_experience",
+        "other",
       ],
     },
   },

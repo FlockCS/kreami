@@ -519,6 +519,65 @@ try {
   r = await putAvatar(bob.token, `${bob.id}/leaving.png`);
   check('bob has a photo to leave behind', r.status < 400, 'HTTP ' + r.status);
 
+  console.log('\nReports\n');
+  r = await rpc(bob.token, 'submit_report', {
+    reason: 'spam',
+    detail: 'Testing the queue.',
+    kreami: edit.kreami_id,
+  });
+  check(
+    'a Kreami can be reported',
+    r.status === 200 && typeof r.body === 'string',
+    JSON.stringify(r.body),
+  );
+
+  r = await rpc(bob.token, 'submit_report', { reason: 'harassment', target_user: alice.id });
+  check('so can an account', r.status === 200, JSON.stringify(r.body));
+
+  r = await rpc(bob.token, 'submit_report', {
+    reason: 'duplicate_experience',
+    experience: first.experience_id,
+  });
+  check('so can an experience', r.status === 200, JSON.stringify(r.body));
+
+  // The constraint is the schema saying what the UI must not get wrong: a
+  // report about two things has nothing single to action.
+  r = await rpc(bob.token, 'submit_report', {
+    reason: 'spam',
+    kreami: edit.kreami_id,
+    target_user: alice.id,
+  });
+  check('but not about two things at once', r.status >= 400, 'HTTP ' + r.status);
+
+  r = await rpc(bob.token, 'submit_report', { reason: 'spam' });
+  check('nor about nothing', r.status >= 400, 'HTTP ' + r.status);
+
+  r = await rpc(bob.token, 'submit_report', { reason: 'spam', target_user: bob.id });
+  check('nor about yourself', r.status >= 400, 'HTTP ' + r.status);
+
+  r = await rpc(null, 'submit_report', { reason: 'spam', kreami: edit.kreami_id });
+  check('anonymous callers cannot report', r.status >= 400, 'HTTP ' + r.status);
+
+  // Reading your own reports back would turn the queue into a channel for
+  // learning what gets actioned and how fast, so there is no read path at all.
+  r = await rest(bob.token, 'reports?select=id');
+  check('nobody can read the report queue', r.status >= 400, 'HTTP ' + r.status);
+
+  r = await rest(bob.token, 'admin_report_queue?select=id');
+  check('nor the admin view over it', r.status >= 400, 'HTTP ' + r.status);
+
+  r = await rest(bob.token, 'admin_matching_stats?select=experiences');
+  check('nor the matching stats', r.status >= 400, 'HTTP ' + r.status);
+
+  r = await rest(bob.token, 'admin_duplicate_candidates?select=score');
+  check('nor the duplicate report', r.status >= 400, 'HTTP ' + r.status);
+
+  r = await rpc(bob.token, 'nightly_maintenance', {});
+  check('and maintenance is not an API', r.status >= 400, 'HTTP ' + r.status);
+
+  r = await rpc(bob.token, 'reconcile_counters', {});
+  check('nor is counter reconciliation', r.status >= 400, 'HTTP ' + r.status);
+
   console.log('\nWhat a signed-in user must NOT be able to do\n');
   r = await rpc(bob.token, 'create_experience', { raw_title: 'sneaking one in' });
   check('cannot call create_experience directly', r.status >= 400, JSON.stringify(r.body));

@@ -32,6 +32,29 @@ const COLUMN_WIDTH = 480;
  * finished restoring bounces a signed-in user to the sign-in screen on every
  * cold start.
  */
+/**
+ * Routes a signed-out visitor may see.
+ *
+ * Anonymous read is not an accident of the RLS policies, it is the top of the
+ * funnel (docs/03, docs/04, docs/08): a shared /e/:slug has to render for
+ * somebody who has never heard of Kreami, or sharing a link accomplishes
+ * nothing. The guard used to send every session-less visitor to sign-in, which
+ * made all of that unreachable — the anonymous grants were real and the door
+ * to them was locked.
+ *
+ * An allowlist rather than a list of private routes, so the failure mode of
+ * forgetting to add a screen is a sign-in prompt rather than a broken render.
+ */
+const PUBLIC_ROUTES = [
+  'intro',
+  'sign-in',
+  '(tabs)', // the feed, which falls back to global when signed out
+  '(tabs)/discover',
+  'e/[slug]',
+  'u/[handle]',
+  'u/[handle]/follows',
+];
+
 function AuthGate({ children }: { children: ReactNode }) {
   const { session, isRestoring } = useSession();
   const profile = useProfile();
@@ -41,12 +64,17 @@ function AuthGate({ children }: { children: ReactNode }) {
   const atSignIn = segments[0] === 'sign-in';
   const atClaimHandle = segments[0] === 'claim-handle';
   const needsHandle = Boolean(profile.data && !profile.data.handle);
+  const isPublic = PUBLIC_ROUTES.includes(segments.join('/'));
 
   useEffect(() => {
     if (isRestoring) return;
 
     if (!session) {
-      if (!atSignIn) router.replace('/sign-in');
+      // Reaching for something that needs an account is the moment to explain
+      // what the account is for, so this lands on the pitch rather than on a
+      // login form. Browsing stays browsable: every public route is left alone,
+      // which is the whole point of the anonymous grants.
+      if (!isPublic) router.replace('/intro');
       return;
     }
 
@@ -63,7 +91,16 @@ function AuthGate({ children }: { children: ReactNode }) {
     // matter which of them wins the race — they agree.
     if (atClaimHandle) router.replace('/welcome');
     else if (atSignIn) router.replace('/');
-  }, [isRestoring, session, profile.isPending, needsHandle, atSignIn, atClaimHandle, router]);
+  }, [
+    isRestoring,
+    session,
+    profile.isPending,
+    needsHandle,
+    atSignIn,
+    atClaimHandle,
+    isPublic,
+    router,
+  ]);
 
   return children;
 }
