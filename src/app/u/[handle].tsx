@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -11,6 +11,9 @@ export default function PublicProfileScreen() {
   const router = useRouter();
   const { handle } = useLocalSearchParams<{ handle: string }>();
   const profile = usePublicProfile(handle);
+
+  // Reached by a direct link or a stale route. Your own profile lives in the tab.
+  if (profile.data?.is_self) return <Redirect href="/me" />;
 
   return (
     <SafeAreaView className="flex-1 bg-paper" style={{ backgroundColor: colors.paper }}>

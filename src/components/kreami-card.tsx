@@ -4,6 +4,7 @@ import Svg, { Path } from 'react-native-svg';
 
 import { KreamRating } from '@/components/kream-rating';
 import type { FeedItem } from '@/lib/feed';
+import { useOpenProfile } from '@/lib/profiles';
 import { colors } from '@/theme/tokens';
 
 /** Compact relative time. Feeds are scanned, not read. */
@@ -73,6 +74,7 @@ export function KreamiCard({
   onToggleLike?: (kreamiId: string) => void;
 }) {
   const router = useRouter();
+  const openProfile = useOpenProfile();
   const author = item.handle ?? item.display_name;
 
   return (
@@ -80,9 +82,7 @@ export function KreamiCard({
       <Pressable
         accessibilityRole="link"
         accessibilityLabel={`${item.display_name}'s profile`}
-        onPress={() =>
-          item.handle && router.push({ pathname: '/u/[handle]', params: { handle: item.handle } })
-        }
+        onPress={() => openProfile(item.handle)}
         className="flex-row items-center gap-2"
       >
         <View className="h-5 w-5 rounded-full" style={{ backgroundColor: colors.fill }} />

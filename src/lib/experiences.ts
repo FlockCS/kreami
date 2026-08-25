@@ -125,8 +125,12 @@ export function useThread(experienceId: string | undefined, sort: ThreadSort = '
       const { column, ascending } = SORTS[sort];
       const { data, error } = await supabase
         .from('kreamis')
+        // The FK must be named. Once `likes` existed there were two paths from
+        // kreamis to profiles — the author (kreamis.user_id) and everyone who
+        // liked it (via likes) — and PostgREST answers an ambiguous embed with
+        // HTTP 300 rather than picking one.
         .select(
-          'id, rating, note, created_at, like_count, reply_count, profiles(handle, display_name, avatar_url)',
+          'id, rating, note, created_at, like_count, reply_count, profiles!kreamis_user_id_fkey(handle, display_name, avatar_url)',
         )
         .eq('experience_id', experienceId!)
         .order(column, { ascending })

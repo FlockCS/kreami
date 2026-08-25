@@ -5,9 +5,12 @@ import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Kream } from '@/components/kream-rating';
+import { useSession } from '@/lib/auth';
 import { useActiveExperiences } from '@/lib/feed';
+import { useOpenProfile } from '@/lib/profiles';
 import { useSearchExperiences } from '@/lib/experiences';
 import { supabase } from '@/lib/supabase';
+import { LoadError } from '@/components/load-error';
 import { colors } from '@/theme/tokens';
 
 type PersonHit = {
@@ -16,19 +19,23 @@ type PersonHit = {
   display_name: string;
 };
 
-function usePeopleSearch(query: string) {
+function usePeopleSearch(query: string, excludeId: string | undefined) {
   const q = query.trim();
   return useQuery({
-    queryKey: ['people-search', q.toLowerCase()],
+    queryKey: ['people-search', q.toLowerCase(), excludeId],
     enabled: q.length >= 2,
     staleTime: 30_000,
     queryFn: async (): Promise<PersonHit[]> => {
-      const { data, error } = await supabase
+      let request = supabase
         .from('profiles')
         .select('id, handle, display_name')
         .not('handle', 'is', null)
         .or(`handle.ilike.%${q}%,display_name.ilike.%${q}%`)
         .limit(8);
+      // Finding yourself in a list of people to follow is noise: you cannot
+      // follow yourself, and the row leads somewhere you already are.
+      if (excludeId) request = request.neq('id', excludeId);
+      const { data, error } = await request;
       if (error) throw new Error(error.message);
       return (data ?? []) as PersonHit[];
     },
@@ -49,8 +56,10 @@ export default function Discover() {
     return () => clearTimeout(t);
   }, [query]);
 
+  const { session } = useSession();
+  const openProfile = useOpenProfile();
   const experiences = useSearchExperiences(debounced);
-  const people = usePeopleSearch(debounced);
+  const people = usePeopleSearch(debounced, session?.user.id);
   const active = useActiveExperiences();
 
   const searching = debounced.trim().length >= 2;
@@ -85,9 +94,7 @@ export default function Discover() {
                   <Pressable
                     key={p.id}
                     accessibilityRole="link"
-                    onPress={() =>
-                      router.push({ pathname: '/u/[handle]', params: { handle: p.handle } })
-                    }
+                    onPress={() => openProfile(p.handle)}
                     className="flex-row items-center gap-3 border-b border-rule py-4 active:bg-fill"
                   >
                     <View
@@ -108,7 +115,9 @@ export default function Discover() {
             <Text className="py-4 font-sans text-[10px] tracking-label text-muted">
               EXPERIENCES
             </Text>
-            {experiences.isFetching ? (
+            {experiences.isError ? (
+              <LoadError error={experiences.error} onRetry={() => experiences.refetch()} />
+            ) : experiences.isFetching ? (
               <ActivityIndicator className="py-4" color={colors.muted} />
             ) : experiences.data?.length ? (
               experiences.data.map((e) => (
@@ -144,7 +153,9 @@ export default function Discover() {
             <Text className="py-4 font-sans text-[10px] tracking-label text-muted">
               BEING RATED THIS WEEK
             </Text>
-            {active.isPending ? (
+            {active.isError ? (
+              <LoadError error={active.error} onRetry={() => active.refetch()} />
+            ) : active.isPending ? (
               <ActivityIndicator className="py-4" color={colors.muted} />
             ) : active.data?.length ? (
               active.data.map((e) => (

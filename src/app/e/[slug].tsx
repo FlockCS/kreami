@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { KreamRating } from '@/components/kream-rating';
+import { LoadError } from '@/components/load-error';
 import {
   averageOf,
   useDistribution,
@@ -143,7 +144,9 @@ export default function ExperienceThread() {
         </View>
 
         <View className="px-6">
-          {thread.isPending ? (
+          {thread.isError ? (
+            <LoadError error={thread.error} onRetry={() => thread.refetch()} />
+          ) : thread.isPending ? (
             <ActivityIndicator className="mt-8" color={colors.muted} />
           ) : thread.data?.length === 0 ? (
             <Text className="mt-8 font-sans text-[15px] leading-6 text-body">

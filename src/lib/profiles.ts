@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 
+import { useProfile } from './auth';
 import { supabase } from './supabase';
 
 export type PublicProfile = {
@@ -60,4 +62,23 @@ export function useProfileKreamis(profileId: string | undefined, sort: ProfileSo
       return (data ?? []) as ProfileKreami[];
     },
   });
+}
+
+/**
+ * Opens a profile. Your own always opens the You tab rather than /u/<handle>:
+ * two routes showing the same person, one of which lacks your own controls, is
+ * a way to end up looking at yourself as a stranger.
+ */
+export function useOpenProfile() {
+  const router = useRouter();
+  const own = useProfile();
+
+  return (handle: string | null | undefined) => {
+    if (!handle) return;
+    if (own.data?.handle && handle.toLowerCase() === own.data.handle.toLowerCase()) {
+      router.push('/me');
+      return;
+    }
+    router.push({ pathname: '/u/[handle]', params: { handle } });
+  };
 }

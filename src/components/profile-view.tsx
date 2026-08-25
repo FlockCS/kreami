@@ -5,6 +5,7 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-nati
 import { Button } from '@/components/button';
 import { KreamRating } from '@/components/kream-rating';
 import { since } from '@/components/kreami-card';
+import { LoadError } from '@/components/load-error';
 import { useToggleFollow } from '@/lib/feed';
 import {
   useProfileKreamis,
@@ -114,7 +115,9 @@ export function ProfileView({
       </View>
 
       <View className="px-6">
-        {kreamis.isPending ? (
+        {kreamis.isError ? (
+          <LoadError error={kreamis.error} onRetry={() => kreamis.refetch()} />
+        ) : kreamis.isPending ? (
           <ActivityIndicator className="mt-8" color={colors.muted} />
         ) : kreamis.data?.length === 0 ? (
           <Text className="mt-8 font-sans text-[15px] leading-6 text-body">No Kreamis yet.</Text>

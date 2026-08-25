@@ -106,6 +106,15 @@ boundary tests deliberately cannot provide.
 
 ## Unverified — Phase 3
 
+- [ ] **Let Claude create test accounts.** `scripts/test-account.mjs` exists but cannot
+      work yet: kreami-dev requires email confirmation, so sign-up returns no session, and
+      the built-in SMTP rate limit is already exhausted. Two ways to unblock, either is
+      fine — turn off "Confirm email" for the dev project (Authentication → Sign In /
+      Providers → Email), or put the dev project's `service_role` key in `.env.local` as
+      `SUPABASE_SERVICE_ROLE_KEY` (gitignored, and not bundled since it has no
+      `EXPO_PUBLIC_` prefix). The service-role route also unblocks reading the resolution
+      log and running merges. *Trigger: any time UI behind a login needs verifying — which
+      is now most of it.*
 - [ ] **A second account.** The follow graph cannot be tested with one user —
       `toggle_follow` rejects self-follows by constraint, so following, follower counts and
       a home feed containing somebody else's Kreami are all unverifiable until a second

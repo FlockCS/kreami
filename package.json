@@ -21,7 +21,9 @@
     "db:push": "supabase db push",
     "db:types": "supabase gen types typescript --project-id \"$SUPABASE_PROJECT_ID\" --schema public > src/lib/database.types.ts",
     "db:types:local": "supabase gen types typescript --local --schema public > src/lib/database.types.ts",
-    "verify:storage": "node scripts/verify-chunked-storage.ts"
+    "verify:storage": "node scripts/verify-chunked-storage.ts",
+    "smoke": "node scripts/smoke.mjs",
+    "test:account": "node scripts/test-account.mjs"
   },
   "dependencies": {
     "@expo-google-fonts/archivo": "^0.4.2",

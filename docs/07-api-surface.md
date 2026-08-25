@@ -159,6 +159,18 @@ supabase.from('replies')
   .order('created_at')
 ```
 
+**Name the foreign key on every embed.** ⚠️ This shipped as a bug. The experience thread
+embedded the author as `profiles(...)`, which worked until the `likes` table existed — at
+which point there were *two* relationship paths from `kreamis` to `profiles` (the author via
+`kreamis.user_id`, and everyone who liked it via `likes`). PostgREST answers an ambiguous
+embed with **HTTP 300**, not an error the client obviously recognises. Write
+`profiles!kreamis_user_id_fkey(...)`.
+
+The general shape of the trap: **adding a table can break a query in a file you did not
+touch.** Typecheck, lint and the web build all pass, because the query is a string and
+nothing checks strings against a live schema. `npm run smoke` does — run it after any
+migration.
+
 **Always name your columns.** `select('*')` on a feed is the single easiest way to blow
 through the 5 GB egress ceiling.
 

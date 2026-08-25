@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { KreamiCard } from '@/components/kreami-card';
+import { LoadError } from '@/components/load-error';
 import { useProfile } from '@/lib/auth';
 import { useGlobalFeed, useHomeFeed, useToggleLike, type FeedItem } from '@/lib/feed';
 import { colors } from '@/theme/tokens';
@@ -46,7 +47,11 @@ export default function Home() {
       </View>
       <View className="mx-6 h-px bg-ink" />
 
-      {home.isPending ? (
+      {home.isError ? (
+        <View className="px-6">
+          <LoadError error={home.error} onRetry={() => home.refetch()} />
+        </View>
+      ) : home.isPending ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color={colors.muted} />
         </View>
