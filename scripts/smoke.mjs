@@ -41,7 +41,9 @@ async function rest(name, query) {
   const ok = r.status === 200;
   if (!ok) failures++;
   console.log(
-    (ok ? '  PASS  ' : '  FAIL  ') + name + (ok ? '' : '  — HTTP ' + r.status + ' ' + body.slice(0, 160)),
+    (ok ? '  PASS  ' : '  FAIL  ') +
+      name +
+      (ok ? '' : '  — HTTP ' + r.status + ' ' + body.slice(0, 160)),
   );
   return ok ? JSON.parse(body) : null;
 }
@@ -56,7 +58,9 @@ async function rpc(name, fn, args) {
   const ok = r.status === 200;
   if (!ok) failures++;
   console.log(
-    (ok ? '  PASS  ' : '  FAIL  ') + name + (ok ? '' : '  — HTTP ' + r.status + ' ' + body.slice(0, 160)),
+    (ok ? '  PASS  ' : '  FAIL  ') +
+      name +
+      (ok ? '' : '  — HTTP ' + r.status + ' ' + body.slice(0, 160)),
   );
   return ok ? JSON.parse(body) : null;
 }
@@ -110,5 +114,7 @@ if (sample) {
   console.log('\n  (no Kreamis yet — thread and profile queries skipped)');
 }
 
-console.log('\n' + (failures ? failures + ' QUERY/QUERIES FAILED' : 'all app queries returned 200'));
+console.log(
+  '\n' + (failures ? failures + ' QUERY/QUERIES FAILED' : 'all app queries returned 200'),
+);
 process.exit(failures ? 1 : 0);
