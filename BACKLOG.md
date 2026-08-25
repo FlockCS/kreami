@@ -81,13 +81,15 @@ boundary tests deliberately cannot provide.
 - [x] ~~`post_kreami` creating an experience, and the one-per-user constraint turning a
       second post into an edit.~~ Verified 2026-08-25 against live data: one experience, one
       Kreami with `updated_at > created_at`, counters reconciling exactly with no drift.
-- [ ] **Exact-match joining.** Two spellings differing only in case must land on one
-      experience. Never exercised — only one experience exists.
+- [x] ~~Exact-match joining across case.~~ Verified 2026-08-25 from the resolution log:
+      "…at 3 AM… wake up…" resolved `new`, then "…at 3 am… wAke up…" resolved `exact`.
+      Trailing-whitespace normalisation too — `"Vibe coding Kreami\n"` then
+      `"Vibe coding Kreami"` matched.
 - [ ] **The punctuation split.** "Jury duty" and "Jury duty!" become separate experiences.
       Known and accepted (D4), but nobody has seen it happen yet.
-- [ ] **Resolution-log outcomes.** `exact` / `alias` / `new` are being written but cannot be
-      read: the table is unreachable from the client by design, and there is no admin path.
-      This is the evidence Q3 turns on, so it needs a read path before the beta.
+- [x] ~~Resolution-log outcomes readable.~~ The dev `service_role` key now sits in
+      `.env.local`, so local scripts can read the log, run merges and create test accounts.
+      A real admin surface is still needed before anyone else operates this — see below.
 - [ ] **Slug collision handling.** `create_experience` retries with a numbered suffix when two
       different titles slugify the same ("jury duty" and "jury duty!"). The retry loop has
       never executed.
@@ -106,15 +108,16 @@ boundary tests deliberately cannot provide.
 
 ## Unverified — Phase 3
 
-- [ ] **Let Claude create test accounts.** `scripts/test-account.mjs` exists but cannot
-      work yet: kreami-dev requires email confirmation, so sign-up returns no session, and
-      the built-in SMTP rate limit is already exhausted. Two ways to unblock, either is
-      fine — turn off "Confirm email" for the dev project (Authentication → Sign In /
-      Providers → Email), or put the dev project's `service_role` key in `.env.local` as
-      `SUPABASE_SERVICE_ROLE_KEY` (gitignored, and not bundled since it has no
-      `EXPO_PUBLIC_` prefix). The service-role route also unblocks reading the resolution
-      log and running merges. *Trigger: any time UI behind a login needs verifying — which
-      is now most of it.*
+- [ ] **Rotate the dev `service_role` key.** Retrieving it via
+      `supabase projects api-keys` printed it in full to the terminal, so it exists in this
+      session's scrollback. Dev project only and no real user data, so the practical risk is
+      low — but rotating costs one click (Project Settings → API → Legacy keys) and then
+      re-running the fetch. *Trigger: your call; do it before this project ever holds
+      anything real.*
+- [ ] **Test accounts still need one switch.** `scripts/test-account.mjs` works via the
+      anon key only if the project allows sign-up without confirmation. It does not, and the
+      built-in SMTP limit is exhausted. Either turn off "Confirm email" for kreami-dev, or
+      rewrite the script to use the service-role admin API now that the key is available.
 - [ ] **A second account.** The follow graph cannot be tested with one user —
       `toggle_follow` rejects self-follows by constraint, so following, follower counts and
       a home feed containing somebody else's Kreami are all unverifiable until a second
