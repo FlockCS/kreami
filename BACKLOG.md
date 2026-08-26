@@ -91,6 +91,15 @@ somebody else signs up.
 - [ ] **Decide on a test runner.** Node runs TypeScript directly, which covers one pure
       module, but Phase 1 has real logic worth testing (handle validation, session restore,
       deep-link parsing). Vitest is ~5 minutes. *Trigger: the next non-trivial pure module.*
+- [ ] **Sentry costs 1.58 MB on web.** Measured by building with and without it: the entry
+      bundle goes 1,789,473 → 3,372,321 bytes, and gzipped 472 KB → 851 KB. It nearly
+      doubles what a first-time visitor downloads, on an app whose landing page is a feed
+      of one-line opinions. The cause is that `@sentry/react-native` carries the browser
+      SDK plus RN-specific code plus integrations we do not use, and Metro does not
+      tree-shake well enough to drop them. The fix is the same platform split already used
+      for the HEIC decoder — `monitoring.ts` / `monitoring.web.ts`, with `@sentry/react` on
+      web, which is roughly a tenth the size. *Trigger: before the private beta, or sooner
+      if anyone loads this on a phone network.*
 - [ ] **Reporting has no way in.** The screen, `submit_report()`, the rate limit and the
       admin queue all work and are covered by `npm run e2e`; `/report` is reachable by URL
       and by nothing else. What is missing is an affordance: the first attempt put the word

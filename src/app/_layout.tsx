@@ -4,6 +4,7 @@ import {
   Archivo_600SemiBold,
 } from '@expo-google-fonts/archivo';
 import { InstrumentSerif_400Regular } from '@expo-google-fonts/instrument-serif';
+import * as Sentry from '@sentry/react-native';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
@@ -17,6 +18,45 @@ import '../global.css';
 import { SessionProvider, useProfile, useSession } from '@/lib/auth';
 import { queryClient } from '@/lib/query-client';
 import { colors, fonts } from '@/theme/tokens';
+
+/**
+ * Error reporting.
+ *
+ * Runs at module scope, before anything renders, so a crash during the very
+ * first paint is still caught — which is exactly the crash you would otherwise
+ * never hear about.
+ *
+ * Four deliberate departures from what the Sentry wizard generates:
+ *
+ * - `sendDefaultPii: false`. The wizard defaults it true, which ships IP
+ *   addresses, cookies and user identifiers to a third party. Kreami's posture
+ *   is that content is public and identity is not incidental; this would
+ *   quietly undo that. See docs/09 and docs/13.
+ * - **No session replay.** It records the screen. On an app whose entire
+ *   content is people's unguarded opinions, recording sessions is a different
+ *   product decision than error reporting, and not one to make by accepting a
+ *   default.
+ * - **No feedback widget.** It injects UI into an app that has a designed one.
+ * - **No log capture.** Console output is the easiest accidental route for a
+ *   token or an email address to end up somewhere it should not be.
+ *
+ * The DSN is not a secret — it identifies the project and is designed to ship
+ * in clients. The auth token, which is a secret, lives only in CI.
+ */
+Sentry.init({
+  dsn: 'https://d0e454e4b1f7c5889aefbdff17d0faf0@o4511979745312768.ingest.us.sentry.io/4511979745574912',
+
+  // Nothing from a laptop. Development throws constantly on purpose, and the
+  // free tier is 5k events a month — spending it on your own hot reloads is
+  // how you find the quota exhausted on the day something real breaks.
+  enabled: !__DEV__,
+
+  sendDefaultPii: false,
+
+  // Enough to see a slow query pattern, cheap enough not to matter. Raise it
+  // if performance ever becomes a question worth asking.
+  tracesSampleRate: 0.2,
+});
 
 SplashScreen.preventAutoHideAsync();
 
@@ -161,7 +201,7 @@ function Root() {
   );
 }
 
-export default function RootLayout() {
+function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <SessionProvider>
@@ -170,3 +210,8 @@ export default function RootLayout() {
     </QueryClientProvider>
   );
 }
+
+// Sentry.wrap installs the error boundary that catches a render crash anywhere
+// below it. Without it the SDK still reports thrown errors, but a component
+// that fails to render takes the app down silently.
+export default Sentry.wrap(RootLayout);

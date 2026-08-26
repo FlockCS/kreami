@@ -114,8 +114,19 @@ Free tier is 5k errors/month, which is far more than this will produce.
   public and identity is not incidental; shipping request bodies to a third party quietly
   undoes that.
 
-Then tell me and I'll wire the `init()` into `src/app/_layout.tsx` alongside the existing
-providers, which is a five-line change.
+**Wired as of the Sentry commit.** `Sentry.init()` and `Sentry.wrap()` are in
+`src/app/_layout.tsx`, and `metro.config.js` composes Sentry's config with NativeWind's.
+Reporting is off in development so local crashes do not spend the 5k/month quota.
+
+Two things still outstanding, both yours:
+
+- **Source maps.** Add the `@sentry/react-native/expo` plugin to `app.json` with your org
+  and project *slugs* (not the numeric ids in the DSN), and put `SENTRY_AUTH_TOKEN` in
+  Actions secrets. Without these, Sentry works but every web stack trace points at minified
+  code. Note Sentry's own docs say source-map upload "currently doesn't work on web" — so
+  this mainly buys you readable native traces later.
+- **Decide on the bundle cost.** Sentry adds 1.58 MB uncompressed / ~380 KB gzipped to the
+  web bundle, which nearly doubles it. See BACKLOG for the fix.
 
 ---
 
