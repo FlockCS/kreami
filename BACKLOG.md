@@ -91,6 +91,15 @@ somebody else signs up.
 - [ ] **Decide on a test runner.** Node runs TypeScript directly, which covers one pure
       module, but Phase 1 has real logic worth testing (handle validation, session restore,
       deep-link parsing). Vitest is ~5 minutes. *Trigger: the next non-trivial pure module.*
+- [ ] **Reporting has no way in.** The screen, `submit_report()`, the rate limit and the
+      admin queue all work and are covered by `npm run e2e`; `/report` is reachable by URL
+      and by nothing else. What is missing is an affordance: the first attempt put the word
+      REPORT under every Kreami, which made a page about opinions look like a page about
+      complaints. Wants an overflow menu — a "..." on a Kreami, an experience and a profile,
+      opening a small sheet — which is a component this app does not have yet and which a
+      few other things would use. Re-linking is that component plus three onPress handlers.
+      *Trigger: before anybody but you can post — reporting is the only moderation input
+      there is.*
 - [ ] **Sign-in does not preserve intent.** docs/08 says tapping "Leave a Kreami" as a
       logged-out visitor should return you to that exact thread afterwards. It currently
       lands you on the pitch and then the feed — nothing breaks, but the thread you were

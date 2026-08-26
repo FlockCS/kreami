@@ -118,13 +118,21 @@ earns anything. See [03 — Architecture](03-architecture.md).
 | `CLOUDFLARE_ACCOUNT_ID` | from step 4 | `deploy-web.yml` |
 | `DEV_SUPABASE_URL` | dev project URL | `keepalive.yml` (optional) |
 | `DEV_SUPABASE_ANON_KEY` | dev anon key | `keepalive.yml` (optional) |
+| `SUPABASE_SERVICE_ROLE_KEY` | **prod** service role key | `nightly.yml` |
 
 `migrate.yml` targets a GitHub Environment named **`production`**. Create it under
 **Settings → Environments** — add a required reviewer there if you want migrations to pause
 for approval before touching prod.
 
-> **The service role key belongs in none of this.** It bypasses RLS entirely and must never
-> reach the client bundle or a build that produces one.
+> **Where the service role key may and may not go.** It bypasses RLS entirely. It must
+> never reach the client bundle or any job that produces one — `deploy-web.yml` above all,
+> which inlines every `EXPO_PUBLIC_*` variable it can see.
+>
+> `nightly.yml` is the one exception and needs it: reconciliation rewrites the counters
+> that no client may touch (D16), so there is no anon-safe way to do the job. That is what
+> docs/09's "service role key exists only in GitHub Actions secrets" means — Actions
+> secrets, and nowhere a bundle is built. This note used to say "none of this", which was
+> written before there was a job that legitimately needed it.
 
 ---
 

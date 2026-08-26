@@ -134,7 +134,8 @@ something slightly different, and land in the same thread.
 ## Phase 5 — Launch readiness (3–4 sessions)
 
 - [x] Onboarding: 4 screens, ending in "leave your first Kreami"
-- [x] Report flow + `reports` table
+- [x] Report flow + `reports` table — *mechanism done and verified; the entry points are
+      unlinked pending a better affordance than REPORT under every Kreami (BACKLOG)*
 - [x] Admin SQL views: report queue, duplicate candidates, matching stats
 - [x] `merge_experiences()` + duplicate-candidate report (`admin_duplicate_candidates`)
 - [x] Nightly counter reconciliation, plus rate-limit pruning, in `nightly.yml`
@@ -142,6 +143,8 @@ something slightly different, and land in the same thread.
       the original list because nobody noticed the route guard was closing the door on it.
 - [ ] **OpenGraph Worker** for `/e/:slug` and `/u/:handle` — needs the Cloudflare project
 - [ ] **Sentry** — needs an account and a DSN
+
+> Step-by-step for every blocked item: [13 — What's blocked on you](13-launch-blockers.md).
 - [x] Mechanical half of the [security checklist](09-security-moderation.md#pre-launch-checklist),
       as `npm run verify:security`. The human half — SMTP on a real phone, secrets placement,
       crons observed running — is still yours.

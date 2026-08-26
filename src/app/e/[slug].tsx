@@ -158,22 +158,6 @@ export default function ExperienceThread() {
           ) : (
             thread.data?.map((k) => <ThreadRow key={k.id} kreami={k} />)
           )}
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Report this experience"
-            onPress={() =>
-              router.push({
-                pathname: '/report',
-                params: { kind: 'experience', id: e.id, subject: e.title },
-              })
-            }
-            className="mt-6 min-h-11 justify-center"
-          >
-            <Text className="font-sans text-[10px] tracking-meta text-muted">
-              REPORT THIS EXPERIENCE
-            </Text>
-          </Pressable>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -181,7 +165,6 @@ export default function ExperienceThread() {
 }
 
 function ThreadRow({ kreami }: { kreami: KreamiWithAuthor }) {
-  const router = useRouter();
   const author = kreami.profiles;
   return (
     <View className="border-b border-rule py-5">
@@ -197,25 +180,6 @@ function ThreadRow({ kreami }: { kreami: KreamiWithAuthor }) {
       {kreami.note ? (
         <Text className="mt-3 font-sans text-[15px] leading-6 text-body">{kreami.note}</Text>
       ) : null}
-
-      {/*
-        Deliberately quiet, and deliberately here. This is where a Kreami
-        permanently lives, so it is where the thing you want to report about it
-        is still on screen. Feed cards tap through to this row.
-      */}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Report this Kreami"
-        onPress={() =>
-          router.push({
-            pathname: '/report',
-            params: { kind: 'kreami', id: kreami.id, subject: kreami.note ?? '' },
-          })
-        }
-        className="mt-2 min-h-11 justify-center self-start"
-      >
-        <Text className="font-sans text-[10px] tracking-meta text-muted">REPORT</Text>
-      </Pressable>
     </View>
   );
 }

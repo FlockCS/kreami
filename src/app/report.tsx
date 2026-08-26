@@ -19,6 +19,16 @@ const MAX_DETAIL = 300;
 /**
  * Report something.
  *
+ * NOT LINKED FROM ANYWHERE right now. The screen, submit_report(), the rate
+ * limit and the admin queue all work and are covered by `npm run e2e` — what
+ * is missing is a way in that does not put the word REPORT under every Kreami
+ * on the page. That wants an overflow menu, which is a component this app does
+ * not have yet. See BACKLOG.
+ *
+ * Kept reachable by URL rather than deleted: the machinery is verified, and
+ * re-linking it should be a component and three onPress handlers, not a
+ * re-implementation.
+ *
  * One screen, one decision, no confirmation step. Somebody reaching for this
  * has usually just seen something they did not want to see, and making them
  * work through a wizard to say so is its own small punishment.
