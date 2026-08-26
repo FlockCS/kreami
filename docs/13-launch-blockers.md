@@ -61,30 +61,76 @@ email**. Do it on **prod**, and leave dev as it is — turning it on there break
 
 ## 3. Resend SMTP
 
-**Blocks:** magic links working for real users.
+**Blocks:** email sign-in working for anyone who is not you.
 
-Supabase's built-in sender allows roughly 2–4 emails an hour and fails silently past that —
-the user sees a link that never arrives.
+### What this is for
 
-1. [resend.com](https://resend.com) → sign up → **Domains** → add yours and complete the DNS
-   records. (No domain yet? Resend's shared sending domain works for testing but lands in
-   spam often enough that it isn't a launch answer.)
-2. **API Keys** → create one with *Sending access*.
-3. Supabase → **Project Settings → Authentication → SMTP Settings** → enable custom SMTP:
-   - Host `smtp.resend.com`, port `465`, username `resend`, password = the API key
-   - Sender email on the domain you verified
-4. **Supabase → Authentication → URL Configuration.** Set **Site URL** to your Pages URL,
-   and add `http://localhost:8081` under **Redirect URLs** so local sign-in keeps working.
-5. Send yourself a magic link and click it.
+Kreami has two ways in: Google, and a magic link. Google is configured **for web only** —
+there are no iOS or Android OAuth client IDs yet (BACKLOG, Blocks native) — so email is the
+only route that works everywhere, and it is the only route at all for anyone who does not
+use Google.
 
-**Site URL is the one that actually breaks this.** Supabase builds the link against it, so
-if it is still `localhost`, every magic link you send a real user points at a machine that
-is not theirs — and it will look like SMTP is broken when it is not.
+Every one of those emails is currently sent by Supabase's built-in sender, which their docs
+cap at **2 messages per hour** and describe as being for "exploring and getting started"
+and "testing email templates". It is not a production sender and is not meant to be one.
+
+Two an hour is not a limit you occasionally brush against. It is one you exceed by testing
+your own sign-in twice. Past it, the send fails and the person waiting sees a screen saying
+to check their email for a link that will never arrive — which is indistinguishable, from
+their side, from the app being broken.
+
+Turning on email confirmation (step 2) sends mail through the same path, so it doubles the
+volume and makes this more urgent, not less.
+
+### Step 0: you need a domain
+
+Resend's docs are explicit: you must add and verify at least one domain before you can send.
+There is no way around this on any provider worth using — mail from an unverified sender
+goes to spam or is rejected outright, and the whole point of this step is deliverability.
+
+If you do not own one yet, that is the real prerequisite here. Roughly $10–15/year. It also
+gets you off `kreami.pages.dev`, which is worth having anyway before you ask anyone to trust
+the link.
+
+### The steps
+
+1. **[resend.com](https://resend.com) → sign up.** Free tier is 3,000 emails/month and
+   100/day (docs/03) — for a beta of 20–50 people that is not a constraint you will feel.
+2. **Domains → Add Domain.** Resend gives you DNS records to add at your registrar. Add all
+   of them, including DMARC — skipping it is a common reason mail still lands in spam after
+   "verification" succeeds. Propagation is usually minutes.
+3. **API Keys → Create API Key**, with *Sending access*. Copy it once; it is not shown again.
+4. **Supabase → Authentication → SMTP Settings** → enable custom SMTP:
+
+   | Field | Value |
+   |-------|-------|
+   | Host | `smtp.resend.com` |
+   | Port | `465` (implicit TLS) or `587` (STARTTLS) |
+   | Username | `resend` — literally that word, not your email |
+   | Password | the API key from step 3 |
+   | Sender email | something on the domain you just verified, e.g. `no-reply@yourdomain` |
+   | Sender name | `Kreami` |
+
+5. **Raise the rate limit — this is the step everyone misses.** Saving custom SMTP settings
+   leaves a **30 messages/hour** cap in place. Supabase → **Authentication → Rate Limits** →
+   raise the email limit. It is better than 2, and it is still low enough to strand people
+   on a launch day.
+
+6. **Authentication → URL Configuration.** Set **Site URL** to your deployed site, and add
+   `http://localhost:8081` under **Redirect URLs** so local sign-in keeps working.
+
+   Supabase builds the link against Site URL. If it is still `localhost`, every link you
+   send points at a machine that is not the recipient's, and it will look exactly like SMTP
+   is broken when it is not.
+
+7. **Test it**: sign in with your own email, and confirm the link both arrives and works.
+   Then check the Resend dashboard — it logs every send, so a delivery that silently failed
+   is visible there rather than being a mystery.
 
 > An earlier version of this step said to open the link on a phone. That was a native
-> concern imported into a web checklist: a magic link has to open *the app* on a device,
-> which matters at the first native build and not before. It is [in BACKLOG](../BACKLOG.md)
-> under Blocks native, where it belongs.
+> concern in a web checklist: a magic link has to open *the app* on a device, which matters
+> at the first native build and not before. It is [in BACKLOG](../BACKLOG.md) under Blocks
+> native, where it belongs.
 
 ---
 
