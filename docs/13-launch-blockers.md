@@ -20,6 +20,15 @@ Follow [12 — steps 2, 4 and 5](12-environment-setup.md) as written, with one a
 secrets table there now includes `SUPABASE_SERVICE_ROLE_KEY`, which `nightly.yml` needs and
 which arrived after that doc was written.
 
+> **Put them in *repository* secrets, not the `production` environment.** Only `migrate.yml`
+> declares `environment: production`; the other three workflows do not, so environment
+> secrets are invisible to them — `deploy-web` fails with "Missing
+> EXPO_PUBLIC_SUPABASE_URL" and the crons skip.
+>
+> The environment still earns its place as the approval gate docs/12 describes. Keeping the
+> secrets out of it is what makes that gate safe to add: put the crons behind a required
+> reviewer and a keepalive waits for approval, which means the database pauses.
+
 Then:
 
 ```bash
@@ -64,16 +73,28 @@ the user sees a link that never arrives.
 3. Supabase → **Project Settings → Authentication → SMTP Settings** → enable custom SMTP:
    - Host `smtp.resend.com`, port `465`, username `resend`, password = the API key
    - Sender email on the domain you verified
-4. Send yourself a magic link **and open it on a phone**, not just the desktop browser.
+4. **Supabase → Authentication → URL Configuration.** Set **Site URL** to your Pages URL,
+   and add `http://localhost:8081` under **Redirect URLs** so local sign-in keeps working.
+5. Send yourself a magic link and click it.
 
-Deep links on device are the part that breaks, and it is [in
-BACKLOG](../BACKLOG.md) as its own item for that reason.
+**Site URL is the one that actually breaks this.** Supabase builds the link against it, so
+if it is still `localhost`, every magic link you send a real user points at a machine that
+is not theirs — and it will look like SMTP is broken when it is not.
+
+> An earlier version of this step said to open the link on a phone. That was a native
+> concern imported into a web checklist: a magic link has to open *the app* on a device,
+> which matters at the first native build and not before. It is [in BACKLOG](../BACKLOG.md)
+> under Blocks native, where it belongs.
 
 ---
 
 ## 4. Rotate the dev service-role key
 
-**Blocks:** nothing. Do it anyway, and it takes one click.
+**Blocks:** nothing, and it is fine to skip. Listed for completeness, not as a task.
+
+The exposure is a terminal scrollback on your own machine, on a dev project holding no real
+user data. The key that would matter is the **prod** service-role key, which lives in
+Actions secrets and has never been printed anywhere.
 
 Retrieving it earlier printed it in full to a terminal, so it exists in scrollback. Dev
 project, no real data, low practical risk — but the fix is free.

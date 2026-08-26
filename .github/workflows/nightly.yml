@@ -30,8 +30,16 @@ jobs:
           URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
           KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
+          # Fail rather than skip. An earlier version exited 0 here, which
+          # made a run with no secrets configured look identical to a clean
+          # night — the job reported success for weeks while reconciling
+          # nothing. A scheduled job that cannot find its configuration is
+          # broken, and should say so where somebody will see it.
           if [ -z "$URL" ] || [ -z "$KEY" ]; then
-            echo "production not configured; skipping"; exit 0
+            echo "EXPO_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is not set."
+            echo "These must be REPOSITORY secrets: this workflow declares no environment,"
+            echo "so secrets scoped to the production environment are invisible to it."
+            exit 1
           fi
           body=$(curl -sS -X POST "${URL%/}/rest/v1/rpc/nightly_maintenance" \
             -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
