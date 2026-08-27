@@ -136,6 +136,26 @@ for approval before touching prod.
 
 ---
 
+## Cloudflare Pages will not upload `node_modules`
+
+Worth knowing before it costs you an afternoon. Pages refuses to upload anything under a
+directory named `node_modules`, deliberately, on the assumption those are build-time
+dependencies ([workers-sdk#3615](https://github.com/cloudflare/workers-sdk/issues/3615)).
+
+Expo emits bundled assets to `dist/assets/node_modules/<package>/...` because it mirrors the
+source path — so every font in the app was dropped from every deploy. The failure is
+completely silent: the upload succeeds, the deploy is green, requests for the missing files
+fall through to the SPA shell and return **200 `text/html`**, and `useFonts` takes the error
+path that exists so a font failure does not hang the splash screen forever. The only symptom
+is that the typography is wrong, and you have to look at the site to see it.
+
+`deploy-web.yml` now renames the directory to `assets/vendor` and rewrites the references
+before uploading. If you ever add another package that ships runtime assets, it is covered
+by the same step — but the step fails the build if a reference survives, rather than
+shipping half of one.
+
+---
+
 ## 6. Verify the pipelines
 
 ```bash
