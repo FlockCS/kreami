@@ -43,6 +43,12 @@ database nobody has used means a trigger is wrong, and is worth stopping for.
 **Done when:** all five workflows have gone green once and `https://kreami.pages.dev` serves
 the app.
 
+**Status: done.** Every migration is applied to prod, the site serves from
+`kreami.pages.dev` against the prod project, anonymous reads work and anonymous writes are
+refused. Two follow-ups moved to BACKLOG: `kreamikream.com` is not yet attached to the Pages
+project under **Custom domains**, and the Google OAuth client will need
+`https://kreamikream.com` in its authorised redirect URIs before sign-in works there.
+
 ---
 
 ## 2. Turn email confirmation back on

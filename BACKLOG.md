@@ -45,10 +45,19 @@ somebody else signs up.
 
 ## Blocks deployment
 
-- [ ] **`kreami-prod` Supabase project.** Only `kreami-dev` exists.
-- [ ] **Cloudflare Pages project + the nine GitHub secrets.** (docs/12 steps 4–5)
-- [ ] **Verify all four workflows go green once.** `migrate`, `deploy-web` and `keepalive`
-      have never run with real secrets.
+- [x] ~~**`kreami-prod` Supabase project.**~~ Exists, and every migration is applied to it.
+- [x] ~~**Cloudflare Pages project + the GitHub secrets.**~~ Ten secrets, at repository
+      level. They were first added to the `production` environment, which only `migrate.yml`
+      declares — so `deploy-web` failed on every push and the crons skipped while reporting
+      success. Repository level is what the other three read.
+- [x] ~~**Verify the workflows go green once.**~~ All five have, with real secrets, and
+      `nightly` was watched actually doing its work rather than skipping.
+- [ ] **`kreamikream.com` does not serve.** DNS is on Cloudflare and the apex resolves to
+      their edge, but nothing answers — the domain has not been attached to the Pages
+      project under **Custom domains**. `kreami.pages.dev` serves fine meanwhile.
+- [ ] **Google OAuth redirect URIs still list only the old origins.** The moment the custom
+      domain serves, Google sign-in breaks there until `https://kreamikream.com` is added to
+      the OAuth client's authorised redirect URIs. *Trigger: attaching the custom domain.*
 
 ## Blocks native
 

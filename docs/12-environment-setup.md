@@ -166,10 +166,16 @@ the database pauses. Re-enable it from the Actions tab when you come back.
 
 ## Phase 0 done-when
 
-- [ ] `npm run web` shows all four checks READY
-- [ ] A migration applied to `kreami-dev` from the CLI, not the dashboard
-- [ ] `npm run db:types` regenerated `database.types.ts`
-- [ ] All four workflows have run green at least once
-- [ ] `https://kreami.pages.dev` serves the foundation screen
+- [x] `npm run web` shows all four checks READY
+- [x] A migration applied to `kreami-dev` from the CLI, not the dashboard
+- [x] `npm run db:types` regenerated `database.types.ts`
+- [x] All five workflows have run green at least once, with real secrets
+- [x] `https://kreami.pages.dev` serves the app, against the **prod** project
+
+> **Put the secrets at repository level, not in the `production` environment.** Only
+> `migrate.yml` declares `environment: production`. Secrets scoped to that environment are
+> invisible to `deploy-web`, `keepalive` and `nightly` — which is how this project spent a
+> day with a deploy that failed every push and a nightly job that reported success while
+> skipping its own body.
 
 When those pass, Phase 0 is closed and [Phase 1 — Auth and identity](10-roadmap.md) starts.
