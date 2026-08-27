@@ -1,3 +1,5 @@
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from './_config.js';
+
 /**
  * Shared bits for the OpenGraph functions.
  *
@@ -74,30 +76,35 @@ export function withPreview(response, { title, description, url }) {
 <meta name="twitter:description" content="${safeDescription}" />
 <meta name="description" content="${safeDescription}" />`;
 
-  return new HTMLRewriter()
+  const rewritten = new HTMLRewriter()
     .on('title', new SetTitle(clamp(title, 70)))
     .on('head', new AppendMeta(meta))
     .transform(response);
+
+  // Diagnosable from the outside. A function that runs and finds nothing looks
+  // exactly like one that never ran, which cost an afternoon once already.
+  const headers = new Headers(rewritten.headers);
+  headers.set('x-kreami-preview', 'hit');
+  return new Response(rewritten.body, { status: rewritten.status, headers });
 }
 
 /**
  * Calls a Supabase RPC with the anon key. Anonymous read is the whole point:
  * these functions serve people who have never signed in and may never.
  *
- * Config comes from _config.json, written by the deploy workflow from the same
- * secrets the bundle is built with. Reading it from a file rather than a
- * Cloudflare dashboard binding means the deploy is self-contained — there is no
- * second place to configure, and no way for the two to disagree.
+ * Config comes from _config.js, written by the deploy workflow from the same
+ * secrets the bundle is built with. A static import rather than a dashboard
+ * binding means the deploy is self-contained: nothing to configure in a second
+ * place, and no way for the two to disagree.
  */
-export async function rpc(_env, fn, args) {
-  const config = await loadConfig();
-  if (!config) return null;
+export async function rpc(fn, args) {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
 
-  const response = await fetch(`${config.SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
     method: 'POST',
     headers: {
-      apikey: config.SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${config.SUPABASE_ANON_KEY}`,
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(args),
@@ -108,16 +115,6 @@ export async function rpc(_env, fn, args) {
   return Array.isArray(body) ? (body[0] ?? null) : body;
 }
 
-let configPromise;
-
-/** Imported once per isolate, not once per request. */
-async function loadConfig() {
-  configPromise ??= import('./_config.json', { with: { type: 'json' } })
-    .then((m) => m.default)
-    .catch(() => null);
-  return configPromise;
-}
-
 /** One decimal, or null below the threshold that makes an average meaningful. */
 export function average(kreamiCount, ratingSum) {
   if (!kreamiCount || kreamiCount < 3) return null;
@@ -126,4 +123,11 @@ export function average(kreamiCount, ratingSum) {
 
 export function plural(n, one, many) {
   return `${n} ${n === 1 ? one : many}`;
+}
+
+/** The page, untouched, but labelled so the outside can tell what happened. */
+export function miss(response) {
+  const headers = new Headers(response.headers);
+  headers.set('x-kreami-preview', 'miss');
+  return new Response(response.body, { status: response.status, headers });
 }

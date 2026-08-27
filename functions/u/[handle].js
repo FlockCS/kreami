@@ -1,4 +1,4 @@
-import { plural, rpc, withPreview } from '../_og.js';
+import { miss, plural, rpc, withPreview } from '../_og.js';
 
 /**
  * Link preview for a profile.
@@ -11,10 +11,10 @@ export async function onRequest(context) {
   const response = await context.next();
 
   try {
-    const profile = await rpc(context.env, 'public_profile', {
+    const profile = await rpc('public_profile', {
       target_handle: context.params.handle,
     });
-    if (!profile?.handle) return response;
+    if (!profile?.handle) return miss(response);
 
     const kreamis = profile.kreami_count ?? 0;
     const given = profile.avg_kream_given;
@@ -32,6 +32,6 @@ export async function onRequest(context) {
       url: new URL(context.request.url).toString(),
     });
   } catch {
-    return response;
+    return miss(response);
   }
 }

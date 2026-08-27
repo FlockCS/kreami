@@ -1,4 +1,4 @@
-import { average, plural, rpc, withPreview } from '../_og.js';
+import { average, miss, plural, rpc, withPreview } from '../_og.js';
 
 /**
  * Link preview for a shared experience.
@@ -15,10 +15,10 @@ export async function onRequest(context) {
   // is nonsense, the visitor still gets the app — they just get it with the
   // blank card that was there before this function existed.
   try {
-    const experience = await rpc(context.env, 'get_experience_by_slug', {
+    const experience = await rpc('get_experience_by_slug', {
       s: context.params.slug,
     });
-    if (!experience?.title) return response;
+    if (!experience?.title) return miss(response);
 
     const count = experience.kreami_count ?? 0;
     const avg = average(count, experience.rating_sum);
@@ -36,6 +36,6 @@ export async function onRequest(context) {
       url: new URL(context.request.url).toString(),
     });
   } catch {
-    return response;
+    return miss(response);
   }
 }

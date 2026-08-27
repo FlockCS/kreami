@@ -92,12 +92,11 @@ jobs:
           EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
         run: |
           set -euo pipefail
-          cat > functions/_config.json <<EOF
-          { "SUPABASE_URL": "${EXPO_PUBLIC_SUPABASE_URL}",
-            "SUPABASE_ANON_KEY": "${EXPO_PUBLIC_SUPABASE_ANON_KEY}" }
+          cat > functions/_config.js <<EOF
+          export const SUPABASE_URL = '${EXPO_PUBLIC_SUPABASE_URL}';
+          export const SUPABASE_ANON_KEY = '${EXPO_PUBLIC_SUPABASE_ANON_KEY}';
           EOF
-          node -e "JSON.parse(require('fs').readFileSync('functions/_config.json'))" \
-            && echo "config written and parses"
+          node --check functions/_config.js && echo "config written and parses"
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
