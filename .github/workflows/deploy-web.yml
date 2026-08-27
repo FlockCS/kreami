@@ -61,10 +61,23 @@ jobs:
           find dist -type f \( -name '*.html' -o -name '*.js' -o -name '*.json' -o -name '*.css' -o -name '*.map' \) \
             -exec sed -i 's#assets/node_modules#assets/vendor#g' {} +
 
-          echo "Rewrote $(grep -rl 'assets/vendor' dist --include='*.html' --include='*.js' | wc -l) file(s)."
-          remaining=$(grep -rl 'assets/node_modules' dist --include='*.html' --include='*.js' | wc -l)
-          if [ "$remaining" != "0" ]; then
-            echo "Still $remaining file(s) referencing assets/node_modules."; exit 1
+          # `|| true` on both: grep exits 1 when it matches nothing, and under
+          # `set -euo pipefail` that is a failed build. For the second grep,
+          # matching nothing is the outcome we want — so without this the step
+          # fails precisely when it has succeeded, which is what happened the
+          # first time this ran.
+          rewrote=$({ grep -rl 'assets/vendor' dist --include='*.html' --include='*.js' || true; } | wc -l)
+          remaining=$({ grep -rl 'assets/node_modules' dist --include='*.html' --include='*.js' || true; } | wc -l)
+
+          echo "Rewrote $rewrote file(s); $remaining still reference the old path."
+          # Numeric comparison, not string: wc pads with spaces on BSD and not
+          # on GNU, so "0" and "       0" are both possible and only one of
+          # them is equal to "0".
+          if [ "$remaining" -ne 0 ]; then
+            echo "Refusing to deploy a half-rewritten site."; exit 1
+          fi
+          if [ "$rewrote" -eq 0 ]; then
+            echo "Nothing referenced assets/vendor after the move — check this step."; exit 1
           fi
 
       - name: Deploy to Cloudflare Pages
