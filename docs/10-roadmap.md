@@ -141,14 +141,15 @@ something slightly different, and land in the same thread.
 - [x] Nightly counter reconciliation, plus rate-limit pruning, in `nightly.yml`
 - [x] **Anonymous browsing** — the funnel the RLS policies were always written for. Not on
       the original list because nobody noticed the route guard was closing the door on it.
-- [ ] **OpenGraph Worker** for `/e/:slug` and `/u/:handle` — needs the Cloudflare project
-- [ ] **Sentry** — needs an account and a DSN
+- [x] **OpenGraph previews** for `/e/:slug` and `/u/:handle` — two Pages Functions rewriting
+      the real page with HTMLRewriter, so there is no crawler-only variant to drift
+- [x] **Sentry** — wired, minus four of the wizard's defaults (see the commit)
+- [ ] **Seed 50–100 Experiences** — the last one, and it needs your judgement (docs/11 Q7)
 
 > Step-by-step for every blocked item: [13 — What's blocked on you](13-launch-blockers.md).
 - [x] Mechanical half of the [security checklist](09-security-moderation.md#pre-launch-checklist),
       as `npm run verify:security`. The human half — SMTP on a real phone, secrets placement,
       crons observed running — is still yours.
-- [ ] **Seed 50–100 Experiences** — your call on what they are (docs/11 Q7)
 
 **Done when:** the checklist passes and a shared link renders a real preview card.
 

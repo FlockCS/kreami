@@ -215,9 +215,11 @@ Each of these has a written reason. Do not pick one up without re-reading it.
 - [ ] **Fuzzy "Did you mean?" matching.** Screen is drawn and marked DEFERRED on the canvas.
       *Trigger: median Kreamis per Experience sits near 1.0 in the beta.* (docs/05, docs/11 Q3)
 - [ ] **Strip punctuation in `normalize_experience_title`.** The cheaper remedy to try first.
-- [ ] **OpenGraph Worker** for `/e/:slug` and `/u/:handle`. Static rendering covers fixed
-      routes; user-generated URLs still render blank preview cards — and those are the ones
-      people share. *Trigger: when link sharing matters.* (docs/03)
+- [ ] **Preview images.** The OpenGraph cards are `summary`, not `summary_large_image`:
+      real title, real description, no picture. A generated card — the experience title over
+      the histogram — would be the single most shareable thing in the app, and needs an
+      image endpoint the static export cannot provide. *Trigger: when anyone actually shares
+      a link and it looks thin.*
 - [ ] **Photos on a Kreami.** Still deferred, and unaffected by avatars shipping: an avatar
       is 5 KB of you, a photo on every Kreami is unbounded storage plus image moderation.
       *Trigger: users repeatedly ask.*
