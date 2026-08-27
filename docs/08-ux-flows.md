@@ -212,11 +212,14 @@ right emotional frame for a rating app.
 
 Kreami is a phone app that also runs in a browser. A feed allowed to stretch to 2000px turns
 every card into a wide band of whitespace with one sentence lost in the middle of it, so on
-web the whole app is held to a **480px centred column** with hairline edges. Native is
+web the whole app is held to a **768px centred column** with hairline edges. Native is
 unconstrained — applying it there would letterbox tablets.
 
-480px is wide enough for a 150-character note to breathe and narrow enough that the
-proportions in the design canvas still hold.
+768px is iPad portrait width. The column started at 480 — the phone mockups' own width — and
+that was faithful to the canvas but pinched on a desktop monitor: a thin ribbon of app
+floating in paper. A tablet measure keeps the single column and a readable line length while
+letting the page read as a page. Anything past roughly 800px and the notes start needing eye
+travel that a scanned feed should not ask for.
 
 ## Implementation notes
 

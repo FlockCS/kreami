@@ -16,6 +16,7 @@ import {
   type ThreadSort,
 } from '@/lib/experiences';
 import { useGoBack } from '@/lib/navigation';
+import { useOpenProfile } from '@/lib/profiles';
 import { colors } from '@/theme/tokens';
 
 const SORTS: { key: ThreadSort; label: string }[] = [
@@ -166,15 +167,27 @@ export default function ExperienceThread() {
 
 function ThreadRow({ kreami }: { kreami: KreamiWithAuthor }) {
   const author = kreami.profiles;
+  const openProfile = useOpenProfile();
   return (
     <View className="border-b border-rule py-5">
       <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center gap-2">
+        {/*
+          The byline opens the profile here exactly as it does in a feed card.
+          It read as plain text for a while, which made the thread the one
+          place in the app where a name was a dead end.
+        */}
+        <Pressable
+          accessibilityRole="link"
+          accessibilityLabel={`${author?.display_name ?? 'This person'}'s profile`}
+          disabled={!author?.handle}
+          onPress={() => openProfile(author?.handle)}
+          className="flex-row items-center gap-2"
+        >
           <Avatar url={author?.avatar_url} size={20} name={author?.display_name} />
           <Text className="font-sans text-[10px] tracking-tab text-ink">
             {(author?.handle ?? author?.display_name ?? 'someone').toUpperCase()}
           </Text>
-        </View>
+        </Pressable>
         <KreamRating rating={kreami.rating} size={14} numeralSize={17} />
       </View>
       {kreami.note ? (

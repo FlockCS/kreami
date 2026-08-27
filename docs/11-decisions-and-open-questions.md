@@ -227,6 +227,30 @@ one conducted in ratings rather than comments.
 **Reversing it** is a single `grant execute on function public.post_reply(uuid, text) to
 authenticated`, plus the UI. Do it after blocks, not before.
 
+
+### D19 — Production is never seeded
+
+**Context.** [10 — Roadmap](10-roadmap.md) calls seeding 50–100 experiences "not optional"
+before the private beta, on the grounds that an empty rating app is unusable: the first ten
+users each create one lonely experience and leave.
+
+**Chosen:** seed `kreami-dev` freely for testing; never seed `kreami-prod`.
+
+**Why, and what it costs.** Kreami's premise is that a rating is somebody's actual opinion
+about something they actually did. Seeded threads are neither, and there is no honest way to
+present them — an experience with a fabricated Kreami on it is a lie about the one number
+the whole product is built on. The alternative is worse than the cold start it solves.
+
+The cost is real and should be named: the cold-start problem does not go away because we
+declined the remedy. The first users will land on a near-empty Discover. What replaces
+seeding is that the first users are people who know you, invited deliberately, in small
+enough numbers that a thin corpus reads as early rather than dead.
+
+**Watch for:** if median Kreamis per Experience sits at 1.0 through the beta (Q3), the
+question of whether this decision or the exact-match rule is responsible will be genuinely
+hard to answer — the two failure modes look identical from the data. Consider seeding a
+handful of experiences *without* Kreamis on them, which creates threads to join without
+inventing opinions.
 ## Open questions
 
 Things genuinely unresolved. Each needs an answer eventually; none blocks Phase 0.

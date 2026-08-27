@@ -8,19 +8,37 @@ import type { FeedItem } from '@/lib/feed';
 import { useOpenProfile } from '@/lib/profiles';
 import { colors } from '@/theme/tokens';
 
-/** Compact relative time. Feeds are scanned, not read. */
+const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+
+/**
+ * Compact relative time. Feeds are scanned, not read.
+ *
+ * Minutes and months both want the letter M, and a Kreami posted six minutes
+ * ago reading as six months old is the worse half of that trade. Instagram
+ * dodges the collision by never printing a month at all — minutes, hours,
+ * days, weeks, then an absolute date — so the unit letters stay unique for
+ * every span a feed actually shows. We do the same, and spell minutes MIN so
+ * no unit is a prefix of another.
+ */
 export function since(iso: string): string {
-  const seconds = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+  const then = new Date(iso);
+  const stamp = then.getTime();
+  if (Number.isNaN(stamp)) return '';
+
+  const seconds = Math.max(0, (Date.now() - stamp) / 1000);
   if (seconds < 60) return 'NOW';
   const minutes = seconds / 60;
-  if (minutes < 60) return `${Math.floor(minutes)}M`;
+  if (minutes < 60) return `${Math.floor(minutes)}MIN`;
   const hours = minutes / 60;
-  if (hours < 24) return `${Math.floor(hours)}H`;
+  if (hours < 24) return `${Math.floor(hours)}HR`;
   const days = hours / 24;
   if (days < 7) return `${Math.floor(days)}D`;
   const weeks = days / 7;
   if (weeks < 52) return `${Math.floor(weeks)}W`;
-  return `${Math.floor(days / 365)}Y`;
+  // Past a year the count stops meaning anything — "3Y" and "4Y" are the same
+  // fact — so the date itself is the more useful string, and it is the one
+  // span where a month name can appear without being mistaken for a duration.
+  return `${MONTHS[then.getMonth()]} ${then.getFullYear()}`;
 }
 
 function Heart({ filled }: { filled: boolean }) {

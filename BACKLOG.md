@@ -11,6 +11,12 @@ no trigger is a wish, not a backlog entry.
 
 ## Blocks real users
 
+- [ ] **Four test experiences are in production.** "MANNY6902", "LAUNCHING KREAMI",
+      "Rating things on Kreami" and one real one. They are the entire contents of Discover
+      and the global feed, so the first visitor sees the app being tested rather than used.
+      Delete them in the SQL editor before anyone else arrives — and note that deleting an
+      experience is not something the app can do, by design (docs/11 Q4).
+
 Nothing here matters while you are the only person using Kreami. All of it matters the day
 somebody else signs up.
 
@@ -39,9 +45,10 @@ somebody else signs up.
       (onboarding and Discover) are built and empty, so a new account is told "there is
       nobody to suggest yet". It stays empty until there are accounts worth suggesting.
       *Trigger: the same moment as seeding — before the private beta.*
-- [ ] **Seed 50–100 experiences.** An empty rating app is unusable; the first ten users need
-      threads to join or they each create a lonely experience and leave. *Trigger: before the
-      private beta.* (docs/10 Phase 5)
+- [x] ~~**Seed 50–100 experiences.**~~ Declined for production — see docs/11 D19. Dev is
+      seeded freely; prod never is, because a fabricated Kreami is a lie about the one number
+      the product is built on. The cold-start problem it was meant to solve is still real and
+      is named in the decision.
 
 ## Blocks deployment
 
@@ -52,13 +59,13 @@ somebody else signs up.
       success. Repository level is what the other three read.
 - [x] ~~**Verify the workflows go green once.**~~ All five have, with real secrets, and
       `nightly` was watched actually doing its work rather than skipping.
-- [ ] **`kreamikream.com` does not serve.** DNS is on Cloudflare and the apex resolves to
-      their edge, but nothing answers — the domain has not been attached to the Pages
-      project under **Custom domains**. `kreami.pages.dev` serves fine meanwhile.
-- [ ] **Google is not enabled on `kreami-prod`.** Sign-in fails with "Unsupported provider:
-      provider is not enabled" — providers are per-project and do not carry over from dev.
-      Needs the prod callback added to the Google client, then the client id and secret
-      pasted into the prod dashboard. See docs/13 §8.
+- [ ] **`kreamikream.com` — confirm it is really live.** It serves for you; it does not
+      resolve from this machine, which is most likely a stale resolver rather than a fault.
+      Worth checking from a phone on mobile data before treating it as the canonical URL,
+      and worth remembering that Supabase's **Site URL** and the Google client's redirect
+      list both still point at `kreami.pages.dev`.
+- [x] ~~**Google is not enabled on `kreami-prod`.**~~ Enabled and verified — sign-in works
+      on the deployed site.
 
 > An earlier version of this entry said to add `https://kreamikream.com` to Google's
 > authorised redirect URIs. That was wrong, and it is the single most common way to get

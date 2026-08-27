@@ -61,10 +61,12 @@ Sentry.init({
 SplashScreen.preventAutoHideAsync();
 
 /**
- * The web column. Wide enough for a 150-character note to breathe, narrow
- * enough that the mockups' proportions still hold.
+ * The web column — a tablet's portrait width, not a phone's. 480 was faithful
+ * to the phone mockups and looked pinched on a desktop monitor, a thin ribbon
+ * of app in an ocean of paper. 768 is iPad portrait: still one column, still
+ * a readable measure, but the page reads as a page.
  */
-const COLUMN_WIDTH = 480;
+const COLUMN_WIDTH = 768;
 
 /**
  * Sends people where they belong, and — just as importantly — does nothing
@@ -171,8 +173,9 @@ function Root() {
         Kreami is a phone app that also runs in a browser. Letting a feed
         stretch to 2000px turns every card into a wide band of whitespace with
         a sentence lost in it, so on web the app is held to a single centred
-        column and the hairlines give it an edge. On native this is a plain
-        passthrough — the constraint would otherwise letterbox tablets.
+        column at tablet width and the hairlines give it an edge. On native
+        this is a plain passthrough — the constraint would otherwise letterbox
+        tablets.
       */}
       <View style={{ flex: 1, backgroundColor: colors.paper, alignItems: 'center' }}>
         <View

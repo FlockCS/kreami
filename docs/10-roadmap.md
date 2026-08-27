@@ -33,10 +33,11 @@ Nothing user-visible. Everything downstream depends on it.
 - [x] Create `kreami-dev`; fill `.env.local` *(done 2026-08-25)*
 - [x] `supabase db push` migrations; regenerate types *(done — the foundation screen now
       completes a real round trip to Postgres)*
-- [ ] Create `kreami-prod` (not needed until deploy)
-- [ ] Create the Cloudflare Pages project `kreami`
-- [ ] Add the nine GitHub secrets and the `production` environment
-- [ ] Watch all four workflows go green once
+- [x] Create `kreami-prod`
+- [x] Create the Cloudflare Pages project `kreami`
+- [x] Add the GitHub secrets — ten, at **repository** level; the `production` environment
+      is read only by `migrate.yml`
+- [x] Watch all five workflows go green once, with real secrets
 
 **Done when:** a schema change on your laptop reaches prod through CI, and the web build
 deploys automatically.
@@ -57,12 +58,12 @@ deploys automatically.
 - [x] Profile photos: `avatars` bucket with per-user write scoping, pick → crop → 256×256,
       and the person glyph as the fallback *(landed late, with Phase 3 — it was never
       assigned to a phase)*
-- [ ] Google OAuth on web and native
+- [x] Google OAuth on **web**, on both projects — native still needs its own client IDs
 - [ ] Magic link with **Resend SMTP configured** — not the built-in sender
 - [ ] Deep link handling; **tested on a physical phone**
-- [ ] Handle picker with live availability check
-- [ ] Session persistence: secure-store native, localStorage web
-- [ ] Sign out, and account deletion
+- [x] Handle picker with live availability check
+- [x] Session persistence: secure-store native, localStorage web
+- [x] Sign out, and account deletion — deletion asserted end-to-end in `npm run e2e`
 
 **Done when:** you can sign in with Google on iOS, Android, and web with the same account,
 close the app, reopen it, and still be signed in.
@@ -84,10 +85,10 @@ The heart of the product. If you build only this, you have something worth showi
 - [x] **`experience_resolution_log` writing from day one** — it is the evidence that decides
       whether the exact-match rule survives the beta
 - [x] Web layout constrained to a centred column
-- [ ] `KreamRating` component: display and input, with 0 visually distinct from unrated
-- [ ] Compose flow: text → live search → resolve → rate → post (two steps, no confirmation)
-- [ ] Experience thread screen with histogram and sort tabs
-- [ ] Your own profile listing your Kreamis
+- [x] `KreamRating` component: display and input, with 0 visually distinct from unrated
+- [x] Compose flow: text → live search → resolve → rate → post (two steps, no confirmation)
+- [x] Experience thread screen with histogram and sort tabs
+- [x] Your own profile listing your Kreamis
 
 **Done when:** you can post a Kreami, have a friend post on the same experience by typing
 something slightly different, and land in the same thread.
@@ -144,7 +145,8 @@ something slightly different, and land in the same thread.
 - [x] **OpenGraph previews** for `/e/:slug` and `/u/:handle` — two Pages Functions rewriting
       the real page with HTMLRewriter, so there is no crawler-only variant to drift
 - [x] **Sentry** — wired, minus four of the wizard's defaults (see the commit)
-- [ ] **Seed 50–100 Experiences** — the last one, and it needs your judgement (docs/11 Q7)
+- [x] ~~Seed 50–100 Experiences~~ — **declined for production** (D19). Dev may be seeded
+      freely; prod never is. The cold-start cost is real and named in the decision.
 
 > Step-by-step for every blocked item: [13 — What's blocked on you](13-launch-blockers.md).
 - [x] Mechanical half of the [security checklist](09-security-moderation.md#pre-launch-checklist),
