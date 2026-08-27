@@ -55,9 +55,17 @@ somebody else signs up.
 - [ ] **`kreamikream.com` does not serve.** DNS is on Cloudflare and the apex resolves to
       their edge, but nothing answers — the domain has not been attached to the Pages
       project under **Custom domains**. `kreami.pages.dev` serves fine meanwhile.
-- [ ] **Google OAuth redirect URIs still list only the old origins.** The moment the custom
-      domain serves, Google sign-in breaks there until `https://kreamikream.com` is added to
-      the OAuth client's authorised redirect URIs. *Trigger: attaching the custom domain.*
+- [ ] **Google is not enabled on `kreami-prod`.** Sign-in fails with "Unsupported provider:
+      provider is not enabled" — providers are per-project and do not carry over from dev.
+      Needs the prod callback added to the Google client, then the client id and secret
+      pasted into the prod dashboard. See docs/13 §8.
+
+> An earlier version of this entry said to add `https://kreamikream.com` to Google's
+> authorised redirect URIs. That was wrong, and it is the single most common way to get
+> lost here. **Google only ever needs the Supabase callback** —
+> `https://<project-ref>.supabase.co/auth/v1/callback`. Your own domains go in *Supabase's*
+> Redirect URLs list. The browser never returns to your site from Google; it returns to
+> Supabase, which then sends it on to you.
 
 ## Blocks native
 

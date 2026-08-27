@@ -225,6 +225,63 @@ it can be written and reviewed before then. Verifying it afterwards is
 
 ---
 
+## 8. Enable Google on the prod project
+
+**Blocks:** signing in at all on the deployed site. Email sign-in works; Google returns
+`{"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not
+enabled"}`.
+
+Auth providers are configured **per project** and do not carry over. `kreami-dev` has Google
+enabled; `kreami-prod` was created later and has only email.
+
+### The distinction that makes this confusing
+
+Three different lists want URLs, and only one of them wants your domain:
+
+| Where | What goes there |
+|-------|-----------------|
+| **Google** → Authorised redirect URIs | `https://<project-ref>.supabase.co/auth/v1/callback` — *Supabase's* URL, never yours |
+| **Supabase** → URL Configuration → Redirect URLs | your origins: `https://kreami.pages.dev/**`, `https://kreamikream.com/**`, `http://localhost:8081/**` |
+| **Supabase** → URL Configuration → Site URL | where to land when nothing else is specified |
+
+The browser never comes back to your site *from Google*. It goes Google → Supabase →
+your site. Google only has to trust Supabase; Supabase decides which of your origins it will
+hand the session to.
+
+### Steps
+
+1. **Google Cloud Console → APIs & Services → Credentials → your OAuth 2.0 Client.** Under
+   *Authorised redirect URIs*, add the **prod** callback:
+
+   ```
+   https://jmzrjxjzvwwnweoqfbsh.supabase.co/auth/v1/callback
+   ```
+
+   Leave the dev one in place — one client can serve both projects.
+
+2. **Supabase (prod) → Authentication → Sign In / Providers → Google.** Enable it, paste the
+   same Client ID and Client Secret. Save.
+
+3. **Supabase (prod) → Authentication → URL Configuration.** Site URL
+   `https://kreami.pages.dev`, and add every origin you sign in from to *Redirect URLs*,
+   including the custom domain and `http://localhost:8081/**`.
+
+4. Verify without guessing:
+
+   ```bash
+   curl -s https://jmzrjxjzvwwnweoqfbsh.supabase.co/auth/v1/settings \
+     -H "apikey: <prod anon key>" | grep -o '"google":[a-z]*'
+   ```
+
+   `"google":true` means the dashboard took it. Then sign in for real.
+
+> Google's consent screen will still show the raw project ref
+> (`jmzrjxjzvwwnweoqfbsh.supabase.co`) rather than "Kreami", which reads like a phishing
+> page. That is a separate, known problem with its own BACKLOG entry — it is the host of the
+> redirect URI, so renaming the app in Google Cloud does not change it.
+
+---
+
 ## 7. Seed 50–100 experiences
 
 **Blocks:** the private beta, and it is not optional. An empty rating app is unusable: the
