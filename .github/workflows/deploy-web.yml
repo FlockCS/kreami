@@ -80,6 +80,25 @@ jobs:
             echo "Nothing referenced assets/vendor after the move — check this step."; exit 1
           fi
 
+      - name: Give the Pages Functions their Supabase config
+        # The OpenGraph functions run at the edge and need to read from
+        # Supabase. Both values are public — the anon key already ships inside
+        # the client bundle, and RLS is what protects the data — but they are
+        # written here from the same secrets the build uses rather than
+        # committed, so there is one source of truth and rotating a key does
+        # not mean remembering a second place.
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+          cat > functions/_config.json <<EOF
+          { "SUPABASE_URL": "${EXPO_PUBLIC_SUPABASE_URL}",
+            "SUPABASE_ANON_KEY": "${EXPO_PUBLIC_SUPABASE_ANON_KEY}" }
+          EOF
+          node -e "JSON.parse(require('fs').readFileSync('functions/_config.json'))" \
+            && echo "config written and parses"
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
