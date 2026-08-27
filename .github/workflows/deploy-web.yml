@@ -35,6 +35,38 @@ jobs:
           EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
         run: npx expo export --platform web
 
+      - name: Move bundled assets out of a node_modules path
+        # Cloudflare Pages refuses to upload anything under a directory named
+        # node_modules — deliberately, on the assumption those are build-time
+        # dependencies (cloudflare/workers-sdk#3615). Expo emits bundled assets
+        # to dist/assets/node_modules/<package>/... because it mirrors the
+        # source path, so all four fonts were silently dropped from every
+        # deploy: the requests fell through to the SPA shell, useFonts got an
+        # error instead of a font, and the site rendered in system fallbacks.
+        #
+        # Nothing warns about this. The upload succeeds, the deploy is green,
+        # and the only symptom is that the typography is wrong.
+        run: |
+          set -euo pipefail
+          if [ ! -d dist/assets/node_modules ]; then
+            echo "No dist/assets/node_modules — Expo's layout changed, check this step."
+            exit 0
+          fi
+
+          mv dist/assets/node_modules dist/assets/vendor
+
+          # Rewrite the references. They are plain strings in the emitted HTML
+          # and JS, so a literal replacement is exact — and restricted to text
+          # output, because the same bytes could occur inside a font file.
+          find dist -type f \( -name '*.html' -o -name '*.js' -o -name '*.json' -o -name '*.css' -o -name '*.map' \) \
+            -exec sed -i 's#assets/node_modules#assets/vendor#g' {} +
+
+          echo "Rewrote $(grep -rl 'assets/vendor' dist --include='*.html' --include='*.js' | wc -l) file(s)."
+          remaining=$(grep -rl 'assets/node_modules' dist --include='*.html' --include='*.js' | wc -l)
+          if [ "$remaining" != "0" ]; then
+            echo "Still $remaining file(s) referencing assets/node_modules."; exit 1
+          fi
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
